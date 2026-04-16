@@ -1,14 +1,19 @@
-# 1) `index.html` — Générateur de ticket Wi‑Fi
-
-```html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wi-Fi Ticket</title>
+  <title>Wi-Fi Ticket · Générateur</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       min-height: 100vh;
       display: flex;
@@ -18,31 +23,39 @@
       font-family: 'Courier New', monospace;
       background: linear-gradient(135deg, #0f172a, #7c3aed);
     }
+
     .ticket {
       width: 100%;
-      max-width: 500px;
+      max-width: 520px;
       background: white;
-      border-radius: 20px;
-      padding: 30px 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      padding: 28px;
+      border-radius: 18px;
+      box-shadow: 0 15px 40px rgba(0,0,0,.35);
     }
+
     h1 {
       text-align: center;
-      margin-bottom: 10px;
       color: #4c1d95;
+      margin-bottom: 10px;
     }
+
     .subhead {
       text-align: center;
       margin-bottom: 24px;
       color: #64748b;
       font-size: .85rem;
     }
-    .input-group { margin-bottom: 18px; }
+
+    .input-group {
+      margin-bottom: 18px;
+    }
+
     label {
       display: block;
       margin-bottom: 8px;
       font-weight: bold;
     }
+
     input, select {
       width: 100%;
       padding: 12px;
@@ -50,11 +63,13 @@
       border-radius: 10px;
       font-family: inherit;
     }
+
     .expiry-row {
       display: flex;
       gap: 10px;
       align-items: center;
     }
+
     .btn {
       width: 100%;
       padding: 14px;
@@ -66,43 +81,45 @@
       margin-top: 10px;
       background: linear-gradient(135deg, #7c3aed, #2563eb);
     }
+
     .btn.secondary {
       background: linear-gradient(135deg, #f59e0b, #ef4444);
     }
+
     #previewUrl {
-      margin-top: 16px;
+      margin-top: 18px;
       padding: 12px;
       border: 1px solid #cbd5e1;
       border-radius: 10px;
-      word-break: break-all;
       display: none;
+      word-break: break-all;
+      cursor: pointer;
     }
-    .btn-link {
-      display: block;
-      margin-top: 16px;
+
+    #ticketQr {
+      margin-top: 18px;
       text-align: center;
-      text-decoration: none;
-      padding: 12px;
-      border-radius: 12px;
-      background: #ffdd00;
-      color: black;
-      font-weight: bold;
+    }
+
+    #ticketQr img {
+      max-width: 180px;
     }
   </style>
 </head>
 <body>
+
   <div class="ticket">
-    <h1>WIFI TICKET</h1>
+    <h1>🎫 WIFI TICKET</h1>
     <div class="subhead">ÉDITION LIMITÉE · EXPIRATION AUTO</div>
 
     <div class="input-group">
       <label>📶 SSID</label>
-      <input type="text" id="ssid" value="MonWiFi" />
+      <input type="text" id="ssid" value="MonWiFi">
     </div>
 
     <div class="input-group">
       <label>🔐 Mot de passe</label>
-      <input type="text" id="password" value="BienvenueChezMoi" />
+      <input type="text" id="password" value="BienvenueChezMoi">
     </div>
 
     <div class="input-group">
@@ -119,18 +136,23 @@
       </div>
     </div>
 
-    <button class="btn" id="generateBtn">🎫 GÉNÉRER LE TICKET</button>
-    <button class="btn secondary" id="demoBtn">🧪 DÉMO (3 min)</button>
+    <button class="btn" id="generateBtn">
+      🎫 GÉNÉRER LE TICKET
+    </button>
+
+    <button class="btn secondary" id="demoBtn">
+      🧪 DÉMO (3 min)
+    </button>
 
     <div id="previewUrl"></div>
-
-    <a href="https://ko-fi.com/VOTRE_PSEUDO_ICI" target="_blank" class="btn-link">☕ OFFRIR UN CAFÉ</a>
+    <div id="ticketQr"></div>
   </div>
 
   <script>
     (() => {
       const hourSelect = document.getElementById('expiryHour');
       const preview = document.getElementById('previewUrl');
+      const qrContainer = document.getElementById('ticketQr');
 
       for (let h = 0; h < 24; h++) {
         const option = document.createElement('option');
@@ -138,34 +160,47 @@
         option.textContent = String(h).padStart(2, '0');
         hourSelect.appendChild(option);
       }
+
       hourSelect.value = '23';
-
-      async function generateKey() {
-        return crypto.subtle.generateKey(
-          { name: 'AES-GCM', length: 256 },
-          true,
-          ['encrypt', 'decrypt']
-        );
-      }
-
-      async function encryptData(key, text) {
-        const iv = crypto.getRandomValues(new Uint8Array(12));
-        const encoded = new TextEncoder().encode(text);
-        const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
-
-        const result = new Uint8Array(iv.length + cipher.byteLength);
-        result.set(iv, 0);
-        result.set(new Uint8Array(cipher), iv.length);
-        return result;
-      }
 
       function toBase64(buffer) {
         return btoa(String.fromCharCode(...buffer));
       }
 
+      async function generateKey() {
+        return crypto.subtle.generateKey(
+          {
+            name: 'AES-GCM',
+            length: 256
+          },
+          true,
+          ['encrypt', 'decrypt']
+        );
+      }
+
       async function exportKey(key) {
         const raw = await crypto.subtle.exportKey('raw', key);
         return toBase64(new Uint8Array(raw));
+      }
+
+      async function encryptData(key, text) {
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const encoded = new TextEncoder().encode(text);
+
+        const encrypted = await crypto.subtle.encrypt(
+          {
+            name: 'AES-GCM',
+            iv
+          },
+          key,
+          encoded
+        );
+
+        const result = new Uint8Array(iv.length + encrypted.byteLength);
+        result.set(iv, 0);
+        result.set(new Uint8Array(encrypted), iv.length);
+
+        return result;
       }
 
       function getExpiry(hour, minute) {
@@ -174,8 +209,21 @@
         return d.getTime();
       }
 
-      async function createLink(ssid, pwd, expiry) {
-        const payload = JSON.stringify({ ssid, pwd, exp: expiry });
+      function generateLinkQR(link) {
+        const qr = qrcode(0, 'M');
+        qr.addData(link);
+        qr.make();
+
+        qrContainer.innerHTML = qr.createImgTag(5);
+      }
+
+      async function createTicketLink(ssid, pwd, expiry) {
+        const payload = JSON.stringify({
+          ssid,
+          pwd,
+          exp: expiry
+        });
+
         const key = await generateKey();
         const encrypted = await encryptData(key, payload);
 
@@ -183,10 +231,11 @@
         const data64 = toBase64(encrypted);
 
         const base = window.location.href.replace(/index\.html$/, '');
+
         return `${base}connect.html#${key64}:${data64}`;
       }
 
-      async function generateTicket(isDemo = false) {
+      async function generateTicket(demo = false) {
         const ssid = document.getElementById('ssid').value.trim();
         const pwd = document.getElementById('password').value.trim();
 
@@ -195,352 +244,33 @@
           return;
         }
 
-        const expiry = isDemo
+        const expiry = demo
           ? Date.now() + 3 * 60 * 1000
           : getExpiry(
               parseInt(hourSelect.value),
               parseInt(document.getElementById('expiryMinute').value)
             );
 
-        const link = await createLink(ssid, pwd, expiry);
+        const link = await createTicketLink(ssid, pwd, expiry);
+
         preview.style.display = 'block';
-        preview.innerHTML = `<strong>Lien :</strong><br>${link}`;
+        preview.innerHTML = link;
+
+        generateLinkQR(link);
+
+        preview.onclick = () => {
+          navigator.clipboard.writeText(link)
+            .then(() => alert('Lien copié !'));
+        };
       }
 
-      document.getElementById('generateBtn').addEventListener('click', () => generateTicket(false));
-      document.getElementById('demoBtn').addEventListener('click', () => generateTicket(true));
+      document.getElementById('generateBtn')
+        .addEventListener('click', () => generateTicket(false));
+
+      document.getElementById('demoBtn')
+        .addEventListener('click', () => generateTicket(true));
     })();
   </script>
+
 </body>
 </html>
-```
-
----
-
-# 2) `connect.html` — Lecture du ticket
-
-```html
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Connexion Wi-Fi</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
-  <style>
-    body {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #2b2b2b;
-      font-family: 'Courier New', monospace;
-      padding: 16px;
-    }
-    .ticket-receipt {
-      width: 100%;
-      max-width: 500px;
-      background: #f9f6f0;
-      padding: 24px;
-      border-radius: 10px;
-      text-align: center;
-    }
-    #qrcode {
-      margin: 20px 0;
-      background: white;
-      padding: 16px;
-    }
-    .status-badge {
-      display: inline-block;
-      padding: 8px 16px;
-      color: white;
-      background: green;
-      margin-bottom: 16px;
-    }
-    .expired-badge {
-      background: darkred;
-    }
-    .copy-btn {
-      margin-top: 10px;
-      padding: 8px 14px;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-  <div class="ticket-receipt">
-    <h2>⌁ CONNEXION ⌁</h2>
-    <div id="dynamicContent">Chargement du ticket...</div>
-  </div>
-
-  <script>
-    (() => {
-      function fromBase64(base64) {
-        const binary = atob(base64);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) {
-          bytes[i] = binary.charCodeAt(i);
-        }
-        return bytes.buffer;
-      }
-
-      async function importKey(key64) {
-        return crypto.subtle.importKey(
-          'raw',
-          fromBase64(key64),
-          { name: 'AES-GCM' },
-          false,
-          ['decrypt']
-        );
-      }
-
-      async function decryptData(key, data64) {
-        const buffer = fromBase64(data64);
-        const bytes = new Uint8Array(buffer);
-        const iv = bytes.slice(0, 12);
-        const cipher = bytes.slice(12);
-
-        const decrypted = await crypto.subtle.decrypt(
-          { name: 'AES-GCM', iv },
-          key,
-          cipher
-        );
-
-        return new TextDecoder().decode(decrypted);
-      }
-
-      function generateWifiQR(ssid, pwd) {
-        const qr = qrcode(0, 'M');
-        qr.addData(`WIFI:T:WPA;S:${ssid};P:${pwd};;`);
-        qr.make();
-        return qr.createImgTag(6);
-      }
-
-      async function processTicket() {
-        const content = document.getElementById('dynamicContent');
-        const hash = window.location.hash.substring(1);
-
-        if (!hash) {
-          content.innerHTML = 'Aucun ticket';
-          return;
-        }
-
-        const [key64, data64] = hash.split(':');
-
-        try {
-          const key = await importKey(key64);
-          const decrypted = await decryptData(key, data64);
-          const data = JSON.parse(decrypted);
-
-          if (Date.now() > data.exp) {
-            content.innerHTML = '<div class="status-badge expired-badge">⛔ EXPIRÉ</div>';
-            return;
-          }
-
-          const timeStr = new Date(data.exp).toLocaleTimeString('fr-FR', {
-            hour: '2-digit',
-            minute: '2-digit'
-          });
-
-          content.innerHTML = `
-            <div class="status-badge">✅ VALIDE</div>
-            <div id="qrcode">${generateWifiQR(data.ssid, data.pwd)}</div>
-            <div>📶 ${data.ssid}</div>
-            <div>🔑 ${data.pwd}</div>
-            <div>⌛ Expire à ${timeStr}</div>
-          `;
-        } catch (e) {
-          content.innerHTML = 'Ticket corrompu';
-        }
-      }
-
-      window.addEventListener('DOMContentLoaded', processTicket);
-      window.addEventListener('hashchange', processTicket);
-    })();
-  </script>
-</body>
-</html>
-```
-
----
-
-# 🚀 Version PRO — Améliorations prêtes pour GitHub Pages / mobile / QR
-
-## Améliorations ajoutées conseillées
-
-### 1) Compatible GitHub Pages
-
-Place simplement les deux fichiers à la racine du dépôt :
-
-* `index.html`
-* `connect.html`
-
-Le lien généré pointera automatiquement vers `connect.html`.
-
-### 2) Copie rapide du lien
-
-Dans `index.html`, remplace le bloc d’aperçu du lien par :
-
-```html
-<div id="previewUrl" onclick="navigator.clipboard.writeText(this.innerText)"></div>
-```
-
-Cela permet un clic pour copier.
-
-### 3) QR code du lien généré
-
-Ajoute dans `index.html` après `previewUrl` :
-
-```html
-<div id="ticketQr"></div>
-<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
-```
-
-Puis dans le JS après la génération du lien :
-
-```javascript
-const qr = qrcode(0, 'M');
-qr.addData(link);
-qr.make();
-document.getElementById('ticketQr').innerHTML = qr.createImgTag(5);
-```
-
-### 4) Responsive mobile renforcé
-
-Ajoute dans le CSS :
-
-```css
-@media (max-width: 600px) {
-  .ticket, .ticket-receipt {
-    padding: 18px;
-    border-radius: 14px;
-  }
-
-  h1, h2 {
-    font-size: 1.6rem;
-  }
-}
-```
-
-### 5) Bouton partage natif téléphone
-
-Ajoute dans `index.html` :
-
-```html
-<button class="btn" id="shareBtn">📤 PARTAGER</button>
-```
-
-Puis :
-
-```javascript
-document.getElementById('shareBtn').addEventListener('click', async () => {
-  if (navigator.share && preview.innerText) {
-    await navigator.share({
-      title: 'Ticket Wi-Fi',
-      text: preview.innerText
-    });
-  }
-});
-```
-
-👉 Cette version est idéale pour smartphone, QR scan et hébergement GitHub Pages.
-
----
-
-# ✅ Améliorations appliquées (code prêt à copier)
-
-## `index.html` — AJOUTS À INTÉGRER
-
-### HTML (ajoute sous `previewUrl`)
-
-```html
-<div id="previewUrl" onclick="copyPreviewLink()"></div>
-<div id="ticketQr"></div>
-<button class="btn" id="shareBtn">📤 PARTAGER</button>
-```
-
-### CDN QR Code (dans le `<head>`)
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
-```
-
-### CSS responsive
-
-```css
-#ticketQr {
-  margin-top: 16px;
-  text-align: center;
-}
-
-#ticketQr img {
-  max-width: 180px;
-}
-
-@media (max-width: 600px) {
-  .ticket, .ticket-receipt {
-    padding: 18px;
-    border-radius: 14px;
-  }
-
-  h1, h2 {
-    font-size: 1.6rem;
-  }
-}
-```
-
-### JavaScript complet à ajouter
-
-```javascript
-function copyPreviewLink() {
-  const text = preview.innerText;
-  if (!text) return;
-
-  navigator.clipboard.writeText(text)
-    .then(() => alert('Lien copié !'));
-}
-
-function generateLinkQR(link) {
-  const qr = qrcode(0, 'M');
-  qr.addData(link);
-  qr.make();
-
-  document.getElementById('ticketQr').innerHTML = qr.createImgTag(5);
-}
-```
-
-### Dans `generateTicket()` remplace la fin par
-
-```javascript
-const link = await createLink(ssid, pwd, expiry);
-preview.style.display = 'block';
-preview.innerHTML = link;
-
-generateLinkQR(link);
-
-const shareBtn = document.getElementById('shareBtn');
-shareBtn.onclick = async () => {
-  if (navigator.share) {
-    await navigator.share({
-      title: 'Ticket Wi-Fi',
-      text: link,
-      url: link
-    });
-  } else {
-    copyPreviewLink();
-  }
-};
-```
-
-# ✅ Résultat
-
-Tu as maintenant :
-
-* lien cliquable + copie
-* QR code du ticket
-* partage WhatsApp / SMS / AirDrop
-* rendu mobile propre
-* prêt GitHub Pages
-
-```
-```
