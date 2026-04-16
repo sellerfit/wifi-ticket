@@ -7,249 +7,174 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{
-  font-family:'Courier New',monospace;
-  min-height:100vh;
-  background:#0f172a;
-  display:flex;align-items:center;justify-content:center;
-  padding:20px;color:#e2e8f0;
-}
-.card{
-  background:#1e293b;max-width:480px;width:100%;
-  padding:30px;border-radius:24px;
-  box-shadow:0 25px 80px rgba(0,0,0,.4);
-  text-align:center;border:1px solid rgba(148,163,184,.2);
-}
-.status{font-size:3rem;margin:10px 0}
-.status.valid{color:#10b981}.status.expired{color:#ef4444}.status.error{color:#f59e0b}
+body{font-family:'Courier New',monospace;min-height:100vh;background:#0f172a;display:flex;align-items:center;justify-content:center;padding:20px;color:#e2e8f0}
+.card{background:#1e293b;max-width:480px;width:100%;padding:30px;border-radius:24px;box-shadow:0 25px 80px rgba(0,0,0,.4);text-align:center;border:1px solid rgba(148,163,184,.2)}
+.status{font-size:3rem;margin:10px 0}.status.valid{color:#10b981}.status.expired{color:#ef4444}.status.error{color:#f59e0b}
 .ssid{font-size:1.4rem;font-weight:bold;margin:15px 0;color:white}
-.password{
-  font-size:1.1rem;background:#0f172a;padding:12px 20px;
-  border-radius:12px;margin:10px 0;font-family:monospace;
-  display:flex;align-items:center;justify-content:center;gap:10px;
-}
+.password{font-size:1.1rem;background:#0f172a;padding:12px 20px;border-radius:12px;margin:10px 0;font-family:monospace;display:flex;align-items:center;justify-content:center;gap:10px}
 .qr-container{margin:25px 0;display:flex;justify-content:center}
 .qr-container img{border-radius:16px;border:4px solid white}
-.btn{
-  width:100%;padding:14px;border:none;border-radius:14px;
-  color:white;font-weight:bold;cursor:pointer;font-size:1rem;
-  margin:8px 0;background:linear-gradient(135deg,#7c3aed,#2563eb);
-}
+.btn{width:100%;padding:14px;border:none;border-radius:14px;color:white;font-weight:bold;cursor:pointer;font-size:1rem;margin:8px 0;background:linear-gradient(135deg,#7c3aed,#2563eb)}
 .btn:hover{transform:translateY(-2px);transition:transform .2s}
 .btn.secondary{background:linear-gradient(135deg,#64748b,#475569)}
 .meta{font-size:.9rem;color:#94a3b8;margin:15px 0}
-.custom-msg{
-  background:rgba(124,58,237,.15);border-left:4px solid #7c3aed;
-  padding:12px;margin:15px 0;border-radius:0 12px 12px 0;text-align:left;
-}
+.custom-msg{background:rgba(124,58,237,.15);border-left:4px solid #7c3aed;padding:12px;margin:15px 0;border-radius:0 12px 12px 0;text-align:left}
 .logo-custom{max-width:150px;margin:10px auto;display:block;border-radius:12px}
-.kofi{
-  position:fixed;bottom:20px;right:20px;
-  background:#ffdd00;color:#000;padding:12px 18px;
-  border-radius:12px;text-decoration:none;font-weight:bold;
-  box-shadow:0 8px 25px rgba(0,0,0,.3);z-index:100;
-}
-.toast{
-  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
-  background:#10b981;color:white;padding:12px 24px;
-  border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.3);
-  opacity:0;transition:opacity .3s;z-index:1000;pointer-events:none;
-}
+.kofi{position:fixed;bottom:20px;right:20px;background:#ffdd00;color:#000;padding:12px 18px;border-radius:12px;text-decoration:none;font-weight:bold;box-shadow:0 8px 25px rgba(0,0,0,.3);z-index:100}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#10b981;color:white;padding:12px 24px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;transition:opacity .3s;z-index:1000;pointer-events:none}
 .toast.show{opacity:1}
+.debug-box{background:#1e1e1e;color:#ff7b7b;padding:12px;border-radius:8px;margin-top:15px;font-size:.8rem;text-align:left;word-break:break-all;line-height:1.4}
+.debug-box code{background:#333;padding:2px 6px;border-radius:4px;color:#7dd3fc}
 </style>
 </head>
 <body>
-<div class="card" id="card">
-  <div id="content">
-    <div style="font-size:2rem">🔄 Chargement...</div>
-  </div>
-</div>
+<div class="card" id="card"><div id="content"><div style="font-size:2rem">🔄 Chargement...</div></div></div>
 <div class="toast" id="toast">Copié !</div>
 <a href="https://ko-fi.com/sellerfit" target="_blank" class="kofi">☕ Ko-fi</a>
 
 <script>
-// === CONFIG ===
-const CONFIG = { BASE_URL: window.location.href.replace(/connect\.html.*/, '') };
+const CONFIG={BASE_URL:window.location.href.replace(/connect\.html.*/,'')};
+const $=id=>document.getElementById(id);
+const showToast=msg=>{const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);};
+const escapeHtml=str=>{const d=document.createElement('div');d.textContent=str;return d.innerHTML;};
 
-// === UTILITAIRES ===
-const $ = id => document.getElementById(id);
-const showToast = msg => {
-  const t = $('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
-};
-const escapeHtml = str => {
-  const d = document.createElement('div');
-  d.textContent = str;
-  return d.innerHTML;
-};
-
-// === CRYPTO (identique au générateur) ===
-const Crypto = {
-  base64ToArrayBuffer(b64) {
-    const binary = atob(b64);
-    const buf = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) buf[i] = binary.charCodeAt(i);
+const Crypto={
+  base64ToArrayBuffer(b64){
+    // Gère les variantes URL-safe de base64
+    const clean=b64.replace(/-/g,'+').replace(/_/g,'/');
+    const bin=atob(clean);
+    const buf=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);
     return buf.buffer;
   },
-  async importKey(base64) {
-    return await crypto.subtle.importKey('raw', this.base64ToArrayBuffer(base64), { name: 'AES-GCM' }, false, ['decrypt']);
+  async importKey(base64){
+    return await crypto.subtle.importKey('raw',this.base64ToArrayBuffer(base64),{name:'AES-GCM'},false,['decrypt']);
   },
-  async decrypt(key, combined) {
-    const arr = new Uint8Array(combined);
-    const iv = arr.slice(0, 12), ct = arr.slice(12);
-    const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
-    return JSON.parse(new TextDecoder().decode(decrypted));
-  },
-  toBase64(buf) {
-    let binary = '';
-    buf.forEach(b => binary += String.fromCharCode(b));
-    return btoa(binary);
+  async decrypt(key,combined){
+    const arr=new Uint8Array(combined);
+    const iv=arr.slice(0,12),ct=arr.slice(12);
+    const dec=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct);
+    return JSON.parse(new TextDecoder().decode(dec));
   }
 };
 
-// === SIGNATURE ===
-const Signature = {
-  key: null,
-  async init() {
-    const encoder = new TextEncoder();
-    const baseKey = await crypto.subtle.importKey('raw', encoder.encode('ABtime_Secret_2026'), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']);
-    this.key = baseKey;
+const Signature={
+  key:null,
+  async init(){
+    const encoder=new TextEncoder();
+    // 🔐 SECRET (DOIT ÊTRE IDENTIQUE DANS generator.html)
+    const baseKey=await crypto.subtle.importKey('raw',encoder.encode('K9#mP2$vL5@nQ8!rT1&wY4^jH7*bC0+zF3%hR6'),{name:'HMAC',hash:'SHA-256'},false,['sign','verify']);
+    this.key=baseKey;
   },
-  async sign(data) {
-    const encoder = new TextEncoder();
-    const sig = await crypto.subtle.sign('HMAC', this.key, encoder.encode(data));
-    return Crypto.toBase64(new Uint8Array(sig));
+  async sign(data){
+    const encoder=new TextEncoder();
+    const sig=await crypto.subtle.sign('HMAC',this.key,encoder.encode(data));
+    return btoa(String.fromCharCode(...new Uint8Array(sig))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
   },
-  async verify(data, signature) {
-    const expected = await this.sign(data);
-    return expected === signature;
+  async verify(data,signature){
+    const expected=await this.sign(data);
+    return expected===signature;
   }
 };
 
-// === QR CODE ===
-function generateWifiQR(ssid, pwd) {
-  const qr = qrcode(0, 'M');
+function generateWifiQR(ssid,pwd){
+  const qr=qrcode(0,'M');
   qr.addData(`WIFI:T:WPA;S:${ssid};P:${pwd};;`);
   qr.make();
   return qr.createImgTag(8);
 }
 
-// === TRAITEMENT DU TICKET ===
-async function processTicket() {
+// === PARSING ROBUSTE DU HASH ===
+function parseHash(hash){
+  // Nouveau format : key:::data:::signature
+  if(hash.includes(':::')){
+    const parts=hash.split(':::');
+    if(parts.length===3) return {key:parts[0],data:parts[1],signature:parts[2]};
+  }
+  // Ancien format (fallback) : key:data:signature
+  const parts=hash.split(':');
+  if(parts.length===3) return {key:parts[0],data:parts[1],signature:parts[2]};
+  // Debug : trop de parties
+  if(parts.length>3){
+    return {key:parts[0],data:parts[1],signature:parts[2],extra:parts.slice(3),error:`${parts.length} parties détectées au lieu de 3`};
+  }
+  return {error:`Format invalide : ${parts.length} parties`};
+}
+
+async function processTicket(){
   await Signature.init();
-  const content = $('content');
-  const hash = window.location.hash.substring(1);
+  const content=$('content');
+  let hash=window.location.hash.substring(1).trim();
   
   // Mode démo
-  if (hash === 'demo') {
-    renderTicket({
-      ssid: 'ABtime_Demo',
-      password: 'Demo2026!',
-      exp: Date.now() + 3 * 60 * 1000,
-      welcomeMsg: 'Bienvenue en mode démo ! 🎉',
-      themeColor: '#7c3aed'
-    }, true);
+  if(hash==='demo'){
+    renderTicket({ssid:'ABtime_Demo',password:'Demo2026!',exp:Date.now()+3*60*1000,welcomeMsg:'Bienvenue en mode démo ! 🎉',themeColor:'#7c3aed'},true);
     return;
   }
   
-  const parts = hash.split(':');
-  if (parts.length !== 3) {
-    content.innerHTML = '<div class="status error">❌</div><h3>Ticket invalide</h3><p>Le lien est corrompu ou incomplet.</p>';
+  const parsed=parseHash(hash);
+  
+  if(parsed.error){
+    content.innerHTML=`<div class="status error">❌</div><h3>Lien invalide</h3><div class="debug-box">
+      🔍 <strong>Erreur de parsing :</strong> ${escapeHtml(parsed.error)}<br><br>
+      💡 <strong>Solutions :</strong><br>
+      1️⃣ Copie le lien <b>intégralement</b> (sans couper à la fin)<br>
+      2️⃣ Vérifie que generator.html et connect.html ont le <b>même secret</b><br>
+      3️⃣ Fais <code>Ctrl+Shift+R</code> pour vider le cache<br><br>
+      📋 Hash reçu :<br><code>${escapeHtml(hash.substring(0,100))}...</code>
+    </div><br><button class="btn secondary" onclick="location.href='${CONFIG.BASE_URL}generator.html'">← Retour</button>`;
     return;
   }
   
-  try {
-    const [key64, data64, signature] = parts;
-    
+  try{
     // Vérification signature
-    if (!await Signature.verify(key64 + ':' + data64, signature)) {
-      throw new Error('Signature invalide');
+    if(!await Signature.verify(parsed.key+':'+parsed.data,parsed.signature)){
+      throw new Error('Signature HMAC invalide — secret différent ou lien corrompu');
     }
     
     // Déchiffrement
-    const key = await Crypto.importKey(key64);
-    const encrypted = Crypto.base64ToArrayBuffer(data64);
-    const data = await Crypto.decrypt(key, encrypted);
+    const key=await Crypto.importKey(parsed.key);
+    const encrypted=Crypto.base64ToArrayBuffer(parsed.data);
+    const data=await Crypto.decrypt(key,encrypted);
     
     // Vérification expiration
-    if (Date.now() > data.exp) {
-      content.innerHTML = `
-        <div class="status expired">⛔</div>
-        <h3>Ticket expiré</h3>
-        <p class="meta">Ce ticket a expiré le ${new Date(data.exp).toLocaleString('fr-FR')}</p>
-        <button class="btn secondary" onclick="location.href='${CONFIG.BASE_URL}generator.html'">🔄 Générer un nouveau ticket</button>
-      `;
+    if(Date.now()>data.exp){
+      content.innerHTML=`<div class="status expired">⛔</div><h3>Ticket expiré</h3><p class="meta">Expire le ${new Date(data.exp).toLocaleString('fr-FR')}</p><button class="btn secondary" onclick="location.href='${CONFIG.BASE_URL}generator.html'">🔄 Nouveau ticket</button>`;
       return;
     }
     
     renderTicket(data);
     
-  } catch (e) {
-    console.error(e);
-    content.innerHTML = `
-      <div class="status error">⚠️</div>
-      <h3>Erreur</h3>
-      <p>Impossible de déchiffrer ce ticket.</p>
-      <button class="btn secondary" onclick="location.href='${CONFIG.BASE_URL}generator.html'">← Retour</button>
-    `;
+  }catch(e){
+    console.error('❌ Déchiffrement échoué :',e);
+    content.innerHTML=`<div class="status error">⚠️</div><h3>Impossible de déchiffrer</h3><div class="debug-box">
+      🔍 <strong>Erreur :</strong> ${escapeHtml(e.message)}<br><br>
+      💡 <strong>Vérifications :</strong><br>
+      • Secret HMAC identique dans les 2 fichiers ?<br>
+      • Lien copié sans modification ?<br>
+      • Cache navigateur vidé (Ctrl+Shift+R) ?<br><br>
+      🗝️ Clé (début) : <code>${escapeHtml(parsed.key?.substring(0,30)||'N/A')}...</code><br>
+      ✍️ Signature : <code>${escapeHtml(parsed.signature?.substring(0,30)||'N/A')}...</code>
+    </div><br><button class="btn secondary" onclick="location.href='${CONFIG.BASE_URL}generator.html'">← Retour</button>`;
   }
 }
 
-function renderTicket(data, isDemo = false) {
-  const card = $('card');
-  const content = $('content');
-  const timeStr = new Date(data.exp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+function renderTicket(data,isDemo=false){
+  const timeStr=new Date(data.exp).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  let customHtml='';
+  if(data.custom&&data.welcomeMsg)customHtml=`<div class="custom-msg">💬 ${escapeHtml(data.welcomeMsg)}</div>`;
+  if(data.custom&&data.logoUrl)customHtml+=`<img src="${escapeHtml(data.logoUrl)}" alt="Logo" class="logo-custom" onerror="this.style.display='none'">`;
   
-  // Appliquer le thème personnalisé
-  if (data.themeColor) {
-    card.style.borderColor = data.themeColor;
-    document.querySelector('.btn').style.background = `linear-gradient(135deg,${data.themeColor},${data.themeColor}dd)`;
-  }
+  $('card').style.borderColor=data.themeColor||'#334155';
+  $('content').innerHTML=`<div class="status valid">✅</div><h2 style="color:white;margin:10px 0">Ticket Wi-Fi Valide</h2>${customHtml}<div class="qr-container">${generateWifiQR(data.ssid,data.password)}</div><div class="ssid">📶 ${escapeHtml(data.ssid)}</div><div class="password">🔐 <span id="pwdText">${'•'.repeat(Math.min(data.password.length,20))}</span><button id="togglePwd" style="background:none;border:none;color:#7c3aed;cursor:pointer;font-size:1.2rem">👁</button></div><button class="btn" id="copyBtn">📋 Copier le mot de passe</button><button class="btn secondary" onclick="navigator.share({title:'Wi-Fi ${escapeHtml(data.ssid)}',text:'Scannez ce QR',url:location.href}).catch(()=>{})">📤 Partager</button><p class="meta">⌛ Expire à ${timeStr}${isDemo?' • <strong>MODE DÉMO</strong>':''}</p>`;
   
-  let customHtml = '';
-  if (data.custom && data.welcomeMsg) {
-    customHtml = `<div class="custom-msg">💬 ${escapeHtml(data.welcomeMsg)}</div>`;
-  }
-  if (data.custom && data.logoUrl) {
-    customHtml += `<img src="${escapeHtml(data.logoUrl)}" alt="Logo" class="logo-custom" onerror="this.style.display='none'">`;
-  }
-  
-  content.innerHTML = `
-    <div class="status valid">✅</div>
-    <h2 style="color:white;margin:10px 0">Ticket Wi-Fi Valide</h2>
-    ${customHtml}
-    <div class="qr-container">${generateWifiQR(data.ssid, data.password)}</div>
-    <div class="ssid">📶 ${escapeHtml(data.ssid)}</div>
-    <div class="password">
-      🔐 <span id="pwdText">${'•'.repeat(Math.min(data.password.length, 20))}</span>
-      <button id="togglePwd" style="background:none;border:none;color:#7c3aed;cursor:pointer">👁</button>
-    </div>
-    <button class="btn" id="copyBtn">📋 Copier le mot de passe</button>
-    <button class="btn secondary" onclick="navigator.share({title:'Wi-Fi ${escapeHtml(data.ssid)}',text:'Scannez ce QR pour vous connecter',url:location.href}).catch(()=>{})">📤 Partager</button>
-    <p class="meta">⌛ Expire à ${timeStr}${isDemo ? ' • <strong>MODE DÉMO</strong>' : ''}</p>
-    <p class="meta" style="font-size:.8rem">🔐 Chiffré AES-GCM • Signature HMAC</p>
-  `;
-  
-  // Toggle mot de passe
-  let pwdVisible = false;
-  $('togglePwd').onclick = () => {
-    const el = $('pwdText');
-    pwdVisible = !pwdVisible;
-    el.textContent = pwdVisible ? data.password : '•'.repeat(Math.min(data.password.length, 20));
-    $('togglePwd').textContent = pwdVisible ? '🙈' : '👁';
-  };
-  
-  // Copie
-  $('copyBtn').onclick = () => {
-    navigator.clipboard.writeText(data.password).then(() => showToast('Mot de passe copié !'));
-  };
+  let pwdVisible=false;
+  $('togglePwd').onclick=()=>{pwdVisible=!pwdVisible;$('pwdText').textContent=pwdVisible?data.password:'•'.repeat(Math.min(data.password.length,20));$('togglePwd').textContent=pwdVisible?'🙈':'👁';};
+  $('copyBtn').onclick=()=>navigator.clipboard.writeText(data.password).then(()=>showToast('Mot de passe copié !'));
 }
 
-// === INIT ===
-window.addEventListener('DOMContentLoaded', processTicket);
-window.addEventListener('hashchange', processTicket);
+window.addEventListener('DOMContentLoaded',processTicket);
+window.addEventListener('hashchange',processTicket);
 </script>
 </body>
 </html>
