@@ -24,7 +24,7 @@ body{
 
 .ticket{
     width:100%;
-    max-width:520px;
+    max-width:540px;
     background:white;
     border-radius:22px;
     padding:30px;
@@ -147,6 +147,38 @@ select:focus{
     word-break:break-all;
     cursor:pointer;
 }
+
+.support-box{
+    margin-top:28px;
+    padding-top:18px;
+    border-top:1px dashed #cbd5e1;
+    text-align:center;
+}
+
+.support-title{
+    font-size:0.85rem;
+    color:#475569;
+    text-transform:uppercase;
+    margin-bottom:12px;
+    font-weight:bold;
+}
+
+.support-btn{
+    display:inline-block;
+    padding:12px 24px;
+    border-radius:14px;
+    text-decoration:none;
+    font-weight:bold;
+    background:linear-gradient(135deg,#ffdd00,#facc15);
+    color:#000;
+    box-shadow:0 8px 18px rgba(0,0,0,0.15);
+}
+
+.support-note{
+    margin-top:10px;
+    font-size:0.72rem;
+    color:#64748b;
+}
 </style>
 </head>
 <body>
@@ -157,28 +189,15 @@ select:focus{
 
     <div class="input-group">
         <label>📶 Nom du réseau Wi-Fi</label>
-        <input
-            type="text"
-            id="ssid"
-            value="MonWiFi"
-            placeholder="Ex : Livebox-1234"
-        >
+        <input type="text" id="ssid" value="MonWiFi">
     </div>
 
     <div class="input-group">
         <label>🔐 Mot de passe</label>
 
         <div class="input-box">
-            <input
-                type="password"
-                id="password"
-                value="BienvenueChezMoi"
-                placeholder="Votre mot de passe"
-            >
-
-            <button class="password-toggle" id="togglePassword">
-                👁
-            </button>
+            <input type="password" id="password" value="BienvenueChezMoi">
+            <button class="password-toggle" id="togglePassword">👁</button>
         </div>
     </div>
 
@@ -188,9 +207,7 @@ select:focus{
         <div class="expiry-wrapper">
             <div class="expiry-row">
                 <select id="expiryHour"></select>
-
                 <span class="time-separator">:</span>
-
                 <select id="expiryMinute">
                     <option value="0">00</option>
                     <option value="15">15</option>
@@ -215,6 +232,18 @@ select:focus{
 
     <div id="previewUrl"></div>
 
+    <div class="support-box">
+        <div class="support-title">❤️ Vous aimez cet outil ?</div>
+
+        <a href="https://ko-fi.com/VOTRE_PSEUDO_ICI" target="_blank" class="support-btn">
+            ☕ Offrir un café
+        </a>
+
+        <div class="support-note">
+            Soutenez le développement • 100% gratuit pour toujours
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -233,7 +262,6 @@ select:focus{
 
     document.getElementById('togglePassword').onclick=function(){
         const pwd=document.getElementById('password');
-
         pwd.type=pwd.type==='password' ? 'text' : 'password';
     };
 
@@ -256,7 +284,6 @@ select:focus{
         );
 
         const combined=new Uint8Array(iv.length+encrypted.byteLength);
-
         combined.set(iv,0);
         combined.set(new Uint8Array(encrypted),iv.length);
 
@@ -317,7 +344,6 @@ select:focus{
         const link=await createLink(ssid,pwd,exp);
 
         const preview=document.getElementById('previewUrl');
-
         preview.style.display='block';
         preview.innerHTML='🔗 '+link;
 
