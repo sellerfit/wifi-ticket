@@ -361,3 +361,186 @@
 </body>
 </html>
 ```
+
+---
+
+# 🚀 Version PRO — Améliorations prêtes pour GitHub Pages / mobile / QR
+
+## Améliorations ajoutées conseillées
+
+### 1) Compatible GitHub Pages
+
+Place simplement les deux fichiers à la racine du dépôt :
+
+* `index.html`
+* `connect.html`
+
+Le lien généré pointera automatiquement vers `connect.html`.
+
+### 2) Copie rapide du lien
+
+Dans `index.html`, remplace le bloc d’aperçu du lien par :
+
+```html
+<div id="previewUrl" onclick="navigator.clipboard.writeText(this.innerText)"></div>
+```
+
+Cela permet un clic pour copier.
+
+### 3) QR code du lien généré
+
+Ajoute dans `index.html` après `previewUrl` :
+
+```html
+<div id="ticketQr"></div>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+```
+
+Puis dans le JS après la génération du lien :
+
+```javascript
+const qr = qrcode(0, 'M');
+qr.addData(link);
+qr.make();
+document.getElementById('ticketQr').innerHTML = qr.createImgTag(5);
+```
+
+### 4) Responsive mobile renforcé
+
+Ajoute dans le CSS :
+
+```css
+@media (max-width: 600px) {
+  .ticket, .ticket-receipt {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  h1, h2 {
+    font-size: 1.6rem;
+  }
+}
+```
+
+### 5) Bouton partage natif téléphone
+
+Ajoute dans `index.html` :
+
+```html
+<button class="btn" id="shareBtn">📤 PARTAGER</button>
+```
+
+Puis :
+
+```javascript
+document.getElementById('shareBtn').addEventListener('click', async () => {
+  if (navigator.share && preview.innerText) {
+    await navigator.share({
+      title: 'Ticket Wi-Fi',
+      text: preview.innerText
+    });
+  }
+});
+```
+
+👉 Cette version est idéale pour smartphone, QR scan et hébergement GitHub Pages.
+
+---
+
+# ✅ Améliorations appliquées (code prêt à copier)
+
+## `index.html` — AJOUTS À INTÉGRER
+
+### HTML (ajoute sous `previewUrl`)
+
+```html
+<div id="previewUrl" onclick="copyPreviewLink()"></div>
+<div id="ticketQr"></div>
+<button class="btn" id="shareBtn">📤 PARTAGER</button>
+```
+
+### CDN QR Code (dans le `<head>`)
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+```
+
+### CSS responsive
+
+```css
+#ticketQr {
+  margin-top: 16px;
+  text-align: center;
+}
+
+#ticketQr img {
+  max-width: 180px;
+}
+
+@media (max-width: 600px) {
+  .ticket, .ticket-receipt {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  h1, h2 {
+    font-size: 1.6rem;
+  }
+}
+```
+
+### JavaScript complet à ajouter
+
+```javascript
+function copyPreviewLink() {
+  const text = preview.innerText;
+  if (!text) return;
+
+  navigator.clipboard.writeText(text)
+    .then(() => alert('Lien copié !'));
+}
+
+function generateLinkQR(link) {
+  const qr = qrcode(0, 'M');
+  qr.addData(link);
+  qr.make();
+
+  document.getElementById('ticketQr').innerHTML = qr.createImgTag(5);
+}
+```
+
+### Dans `generateTicket()` remplace la fin par
+
+```javascript
+const link = await createLink(ssid, pwd, expiry);
+preview.style.display = 'block';
+preview.innerHTML = link;
+
+generateLinkQR(link);
+
+const shareBtn = document.getElementById('shareBtn');
+shareBtn.onclick = async () => {
+  if (navigator.share) {
+    await navigator.share({
+      title: 'Ticket Wi-Fi',
+      text: link,
+      url: link
+    });
+  } else {
+    copyPreviewLink();
+  }
+};
+```
+
+# ✅ Résultat
+
+Tu as maintenant :
+
+* lien cliquable + copie
+* QR code du ticket
+* partage WhatsApp / SMS / AirDrop
+* rendu mobile propre
+* prêt GitHub Pages
+
+```
+```
