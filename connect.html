@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABtime • Connexion Wi-Fi</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<style>
+body{font-family:'Courier New', monospace; min-height:100vh; display:flex; justify-content:center; align-items:center; background:#1e293b; padding:20px;}
+.card{background:white; max-width:500px; width:100%; padding:30px; border-radius:20px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.25);}
+#qrcode{margin:20px 0;}
+.ssid{font-size:1.4rem; font-weight:bold; margin:15px 0; color:#4c1d95;}
+.password{font-size:1.1rem; margin:15px 0; color:#334155;}
+.copy-btn{background:linear-gradient(135deg,#7c3aed,#2563eb); color:white; padding:10px 16px; border:none; border-radius:12px; cursor:pointer; font-weight:bold;}
+.kofi-float{position:fixed;bottom:20px;right:20px;background:#ffdd00;color:black;padding:14px 18px;border-radius:16px;text-decoration:none;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,0.25);z-index:999;}
+</style>
+</head>
+<body>
+<div class="card">
+    <div id="dynamicContent">Chargement du ticket...</div>
+</div>
+
+<a href="https://ko-fi.com/sellerfit" target="_blank" class="kofi-float">☕ Ko-fi</a>
+
+<script>
+(function(){
+function base64ToArrayBuffer(b){const bin=atob(b);const arr=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i); return arr.buffer;}
+async function importKey(k){return await crypto.subtle.importKey("raw", base64ToArrayBuffer(k), {name:"AES-GCM"}, false, ["decrypt"]);}
+async function decryptData(key,data64){const buf=base64ToArrayBuffer(data64); const arr=new Uint8Array(buf); const iv=arr.slice(0,12); const ct=arr.slice(12); const dec=await crypto.subtle.decrypt({name:"AES-GCM",iv},key,ct); return new TextDecoder().decode(dec);}
+function generateWifiQR(ssid,pwd){const qr=qrcode(0,'M'); qr.addData(`WIFI:T:WPA;S:${ssid};P:${pwd};;`); qr.make(); return qr.createImgTag(6);}
+function escapeHtml(t){const d=document.createElement('div'); d.textContent=t; return d.innerHTML;}
+
+async function processTicket(){
+    const hash=window.location.hash.substring(1); if(!hash){document.getElementById('dynamicContent').innerHTML='Ticket invalide'; return;}
+    const parts=hash.split(':'); if(parts.length!==2){document.getElementById('dynamicContent').innerHTML='Ticket invalide'; return;}
+    try{
+        const key=await importKey(parts[0]);
+        const decrypted=await decryptData(key,parts[1]);
+        const data=JSON.parse(decrypted);
+        const now=Date.now();
+        const content=document.getElementById('dynamicContent');
+        if(now>data.exp){
+            content.innerHTML='<h2>⛔ EXPIRÉ</h2>';
+            return;
+        }
+        const timeStr=new Date(data.exp).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+        content.innerHTML=`
+            <h2>✅ VALIDE</h2>
+            <div id="qrcode">${generateWifiQR(data.ssid,data.pwd)}</div>
+            <div class="ssid">📶 ${escapeHtml(data.ssid)}</div>
+            <div class="password">🔐 ${escapeHtml(data.pwd)}</div>
+            <button class="copy-btn" id="copyBtn">Copier le mot de passe</button>
+            <div>⌛ Expire à ${timeStr}</div>
+        `;
+        document.getElementById('copyBtn').onclick=()=>{navigator.clipboard.writeText(data.pwd).then(()=>alert('Mot de passe copié !'));}
+    }catch(e){
+        document.getElementById('dynamicContent').innerHTML='Ticket corrompu';
+    }
+}
+window.addEventListener('DOMContentLoaded',processTicket);
+window.addEventListener('hashchange',processTicket);
+})();
+</script>
+</body>
+</html>
