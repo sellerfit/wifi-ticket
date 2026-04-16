@@ -6,19 +6,142 @@
     <title>Connexion Wi-Fi · Ticket Valide</title>
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <style>
-        *{box-sizing:border-box;margin:0;padding:0}body{background:#2b2b2b;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Courier New',Courier,monospace;padding:16px}.ticket-receipt{max-width:500px;width:100%;background:#f9f6f0;padding:25px 20px 30px;border-radius:8px;box-shadow:0 12px 28px rgba(0,0,0,0.4);border:1px solid #d9cdb3;position:relative;text-align:center}.ticket-receipt::before,.ticket-receipt::after{content:"";position:absolute;left:15px;right:15px;height:4px;background:repeating-linear-gradient(90deg,#b9aa8f,#b9aa8f 6px,transparent 6px,transparent 12px)}.ticket-receipt::before{top:12px}.ticket-receipt::after{bottom:12px}h2{font-family:'Courier New',Courier,monospace;font-size:2rem;text-transform:uppercase;border-bottom:2px dashed #aa9f8a;padding-bottom:8px;margin-bottom:20px;color:#1f1e1b}.status-badge{display:inline-block;background:#2c5e2e;color:#f0eadb;padding:6px 16px;font-weight:bold;text-transform:uppercase;margin-bottom:20px}.expired-badge{background:#8b2a2a}#qrcode{display:flex;justify-content:center;margin:20px 0;background:white;padding:20px;border:3px solid #7f7462}#qrcode img,#qrcode canvas{width:220px;height:220px}.ssid-display{font-size:1.6rem;font-weight:bold;background:#e9e0d2;padding:10px;margin:10px 0;border:1px dashed #5e5446}.pwd-row{display:flex;align-items:center;justify-content:center;gap:10px;margin:15px 0;background:#ddd2c2;padding:10px}.copy-btn{background:#5f5544;color:#f0eadb;padding:8px 16px;font-family:monospace;font-weight:bold;cursor:pointer}.expiry-info{margin-top:20px;border-top:1px dashed #a99c89;padding-top:15px}
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{
+            background:#2b2b2b;
+            min-height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-family:'Courier New',Courier,monospace;
+            padding:16px
+        }
+        .ticket-receipt{
+            max-width:500px;
+            width:100%;
+            background:#f9f6f0;
+            padding:25px 20px 30px;
+            border-radius:8px;
+            box-shadow:0 12px 28px rgba(0,0,0,0.4);
+            border:1px solid #d9cdb3;
+            position:relative;
+            text-align:center
+        }
+        .ticket-receipt::before,
+        .ticket-receipt::after{
+            content:"";
+            position:absolute;
+            left:15px;
+            right:15px;
+            height:4px;
+            background:repeating-linear-gradient(90deg,#b9aa8f,#b9aa8f 6px,transparent 6px,transparent 12px)
+        }
+        .ticket-receipt::before{top:12px}
+        .ticket-receipt::after{bottom:12px}
+        h2{
+            font-family:'Courier New',Courier,monospace;
+            font-size:2rem;
+            text-transform:uppercase;
+            border-bottom:2px dashed #aa9f8a;
+            padding-bottom:8px;
+            margin-bottom:20px;
+            color:#1f1e1b
+        }
+        .status-badge{
+            display:inline-block;
+            background:#2c5e2e;
+            color:#f0eadb;
+            padding:6px 16px;
+            font-weight:bold;
+            text-transform:uppercase;
+            margin-bottom:20px
+        }
+        .expired-badge{
+            background:#8b2a2a
+        }
+        #qrcode{
+            display:flex;
+            justify-content:center;
+            margin:20px 0;
+            background:white;
+            padding:20px;
+            border:3px solid #7f7462
+        }
+        #qrcode img, #qrcode canvas{
+            width:220px;
+            height:220px
+        }
+        .ssid-display{
+            font-size:1.6rem;
+            font-weight:bold;
+            background:#e9e0d2;
+            padding:10px;
+            margin:10px 0;
+            border:1px dashed #5e5446
+        }
+        .pwd-row{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:10px;
+            margin:15px 0;
+            background:#ddd2c2;
+            padding:10px
+        }
+        .copy-btn{
+            background:#5f5544;
+            color:#f0eadb;
+            padding:8px 16px;
+            font-family:monospace;
+            font-weight:bold;
+            cursor:pointer
+        }
+        .expiry-info{
+            margin-top:20px;
+            border-top:1px dashed #a99c89;
+            padding-top:15px
+        }
+        .error-msg{
+            color:#a13026;
+            font-weight:bold;
+            padding:30px 10px
+        }
+
+        /* Bouton Ko-fi aligné */
+        .btn-link {
+            display: inline-block;
+            background: #ffdd00;
+            color: #000000;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 1rem;
+            border: none;
+            border-radius: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+        .btn-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
-<div class="ticket-receipt"><h2>⌁ CONNEXION ⌁</h2><div id="dynamicContent">Chargement du ticket...</div><div class="ticket-receipt"><h2>⌁ CONNEXION ⌁</h2><div id="dynamicContent">Chargement du ticket...</div>
-        <!-- SOUTIEN KO-FI -->
-        <div style="margin-top: 25px; text-align: center; border-top: 1px dashed #a78bfa; padding-top: 15px;">
-            <div style="font-size: 0.7rem; color: #4c1d95; text-transform: uppercase; margin-bottom: 6px;">Un service gratuit ?</div>
-            <a href="https://sellerfit.github.io/wifi-ticket/" target="_blank" style="display: inline-block; background: #ffdd00; color: #000000; padding: 6px 16px; text-decoration: none; font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 0.9rem; border: none; border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); text-transform: uppercase;">☕ Soutenir</a>
-            <div style="font-size: 0.55rem; margin-top: 6px; color: #475569;">Créez votre ticket sur wifi-ticket</div>
-        </div>
-    </div>  <!-- Cette ligne ferme ticket-receipt -->
-<script></div>
+<div class="ticket-receipt">
+    <h2>⌁ CONNEXION ⌁</h2>
+    <div id="dynamicContent">Chargement du ticket...</div>
+
+    <!-- SOUTIEN KO-FI -->
+    <div style="margin-top: 25px; text-align: center; border-top: 1px dashed #a99c89; padding-top: 15px;">
+        <div style="font-size: 0.7rem; color: #4c1d95; text-transform: uppercase; margin-bottom: 6px;">Un service gratuit ?</div>
+        <a href="https://sellerfit.github.io/wifi-ticket/" target="_blank" class="btn-link">☕ SOUTENIR</a>
+        <div style="font-size: 0.55rem; margin-top: 8px; color: #475569;">Créez votre ticket sur wifi-ticket</div>
+    </div>
+</div>
+
 <script>
     (function(){
         function base64ToArrayBuffer(b){const bin=atob(b);const bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return bytes.buffer;}
