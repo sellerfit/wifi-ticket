@@ -36,6 +36,63 @@ body{
     background:white;
     padding:30px 20px;
     border-radius:20px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.25);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:20px;
+    color:#4c1d95;
+}
+
+.input-group{
+    margin:18px 0;
+}
+
+.input-group label{
+    display:block;
+    font-weight:bold;
+    margin-bottom:8px;
+    color:#334155;
+    font-size:0.95rem;
+}
+
+.input-group input,
+.input-group select{
+    width:100%;
+    padding:14px;
+    border:2px solid #cbd5e1;
+    border-radius:14px;
+    font-size:1rem;
+    font-family:'Courier New', Courier, monospace;
+}
+
+.input-group input:focus,
+.input-group select:focus{
+    outline:none;
+    border-color:#7c3aed;
+    box-shadow:0 0 0 4px rgba(124,58,237,0.15);
+}
+
+.expiry-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.expiry-row select{
+    flex:1;
+}
+
+.time-separator{
+    font-size:1.4rem;
+    font-weight:bold;
+}
+
+.time-hint{
+    margin-top:8px;
+    font-size:0.75rem;
+    color:#64748b;
 }
 
 .btn{
@@ -68,22 +125,51 @@ body{
 
 <div class="ticket">
 
-    <h1>WIFI TICKET</h1>
+    <h1>🎫 WIFI TICKET</h1>
 
-    <input type="text" id="ssid" value="MonWiFi">
-    <input type="text" id="password" value="BienvenueChezMoi">
+    <div class="input-group">
+        <label for="ssid">📶 Nom du réseau Wi-Fi</label>
+        <input
+            type="text"
+            id="ssid"
+            placeholder="Ex : Livebox-1234"
+            value="MonWiFi"
+        >
+    </div>
 
-    <select id="expiryHour"></select>
+    <div class="input-group">
+        <label for="password">🔐 Mot de passe</label>
+        <input
+            type="text"
+            id="password"
+            placeholder="Ex : Bienvenue2026!"
+            value="BienvenueChezMoi"
+        >
+    </div>
 
-    <select id="expiryMinute">
-        <option value="0">00</option>
-        <option value="15">15</option>
-        <option value="30">30</option>
-        <option value="45">45</option>
-    </select>
+    <div class="input-group">
+        <label for="expiryHour">⏳ Heure d’expiration</label>
+
+        <div class="expiry-row">
+            <select id="expiryHour"></select>
+
+            <span class="time-separator">:</span>
+
+            <select id="expiryMinute">
+                <option value="0">00</option>
+                <option value="15">15</option>
+                <option value="30">30</option>
+                <option value="45">45</option>
+            </select>
+        </div>
+
+        <div class="time-hint">
+            Le ticket sera invalide après cette heure
+        </div>
+    </div>
 
     <button class="btn" id="generateBtn">🎫 GÉNÉRER</button>
-    <button class="btn secondary" id="demoBtn">🧪 DÉMO</button>
+    <button class="btn secondary" id="demoBtn">🧪 DÉMO 3 MIN</button>
 
     <div id="previewUrl"></div>
 
@@ -122,7 +208,6 @@ body{
         );
 
         const combined=new Uint8Array(iv.length+cipher.byteLength);
-
         combined.set(iv,0);
         combined.set(new Uint8Array(cipher),iv.length);
 
@@ -149,12 +234,7 @@ body{
     }
 
     async function createEncryptedLink(ssid,pwd,expiry){
-
-        const payload=JSON.stringify({
-            ssid,
-            pwd,
-            exp:expiry
-        });
+        const payload=JSON.stringify({ssid,pwd,exp:expiry});
 
         const key=await generateKey();
         const encrypted=await encryptData(key,payload);
@@ -170,12 +250,11 @@ body{
     }
 
     async function generateAndShow(demo){
-
         const ssid=document.getElementById('ssid').value.trim();
         const pwd=document.getElementById('password').value.trim();
 
         if(!ssid||!pwd){
-            alert('Remplissez SSID et mot de passe');
+            alert('Remplissez les champs');
             return;
         }
 
@@ -186,22 +265,16 @@ body{
                 parseInt(document.getElementById('expiryMinute').value)
             );
 
-        try{
-            const link=await createEncryptedLink(ssid,pwd,exp);
+        const link=await createEncryptedLink(ssid,pwd,exp);
 
-            const prev=document.getElementById('previewUrl');
+        const prev=document.getElementById('previewUrl');
+        prev.style.display='block';
+        prev.innerHTML=link;
 
-            prev.style.display='block';
-            prev.innerHTML=link;
-
-            prev.onclick=()=>{
-                navigator.clipboard.writeText(link)
-                    .then(()=>alert('Copié !'));
-            };
-
-        }catch(e){
-            alert('Erreur: '+e);
-        }
+        prev.onclick=()=>{
+            navigator.clipboard.writeText(link)
+                .then(()=>alert('Lien copié !'));
+        };
     }
 
     document.getElementById('generateBtn')
