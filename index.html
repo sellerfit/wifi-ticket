@@ -255,10 +255,14 @@
     <div class="input-group"><label>⏳ Expire à</label><div class="expiry-row"><select id="expiryHour" style="background:#fffcf5; border:1.5px solid #bfb6a4; padding:12px; font-family:monospace;"></select><span>H</span><select id="expiryMinute" style="background:#fffcf5; border:1.5px solid #bfb6a4; padding:12px; font-family:monospace;"><option value="0">00</option><option value="15">15</option><option value="30">30</option><option value="45">45</option></select></div><div class="hint">Le lien deviendra inactif après cette heure.</div></div>
     <div class="action-buttons"><button class="btn" id="generateBtn">🎫 GÉNÉRER LE TICKET</button></div>
     <div id="previewUrl"></div>
-    <div class="demo-area"><button class="btn secondary" id="demoBtn">🧪 DÉMO (expire dans 3 min)</button><div class="footer-note">SCANNEZ · CONNECTÉ · ZÉRO SERVEUR</div></div>
+        <div style="display: flex; flex-direction: column; gap: 12px; margin: 20px 0;">
+        <button class="btn" id="generateBtn">🎫 GÉNÉRER LE TICKET</button>
+        <button class="btn secondary" id="demoBtn">🧪 DÉMO (expire dans 3 min)</button>
+        <!-- Le bouton Ko-fi viendra ici juste après, dans une div séparée mais avec la même largeur -->
+    </div>
+    <div id="previewUrl"></div>
+    <div class="footer-note" style="margin-top: 5px;">SCANNEZ · CONNECTÉ · ZÉRO SERVEUR</div>
 </div>
-    <div class="demo-area"><button class="btn secondary" id="demoBtn">🧪 DÉMO (expire dans 3 min)</button><div class="footer-note">SCANNEZ · CONNECTÉ · ZÉRO SERVEUR</div></div>
-
                 <!-- SOUTIEN KO-FI -->
         <div style="margin-top: 15px; width: 100%;">
             <a href="https://ko-fi.com/VOTRE_PSEUDO_ICI" target="_blank" class="btn-link">☕ OFFRIR UN CAFÉ</a>
