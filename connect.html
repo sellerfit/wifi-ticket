@@ -19,12 +19,78 @@ const CONFIG={BASE_URL:window.location.href.replace(/connect\.html.*/,'')};
 const $=id=>document.getElementById(id);
 const showToast=msg=>{const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);};
 const escapeHtml=str=>{const d=document.createElement('div');d.textContent=str;return d.innerHTML;};
-const Crypto={base64ToArrayBuffer(b64){const bin=atob(b64.replace(/-/g,'+').replace(/_/g,'/')),buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);return buf.buffer;},async importKey(b64){return await crypto.subtle.importKey('raw',this.base64ToArrayBuffer(b64),{name:'AES-GCM'},false,['decrypt']);},async decrypt(k,comb){const arr=new Uint8Array(comb),iv=arr.slice(0,12),ct=arr.slice(12),dec=await crypto.subtle.decrypt({name:'AES-GCM',iv},k,ct);return JSON.parse(new TextDecoder().decode(dec));}};
-const Signature={key:null,async init(){const enc=new TextEncoder();this.key=await crypto.subtle.importKey('raw',enc.encode('K9#mP2$vL5@nQ8!rT1&wY4^jH7*bC0+zF3%hR6'),{name:'HMAC',hash:'SHA-256'},false,['sign','verify']);},async sign(data){const enc=new TextEncoder(),sig=await crypto.subtle.sign('HMAC',this.key,enc.encode(data));return Crypto.toBase64(new Uint8Array(sig));},async verify(data,sig){return await this.sign(data)===sig;},toBase64(buf){let b='';buf.forEach(c=>b+=String.fromCharCode(c));return btoa(b);}};
+
+// === CRYPTO (avec toBase64 inclus) ===
+const Crypto={
+  toBase64(buf){let b='';buf.forEach(c=>b+=String.fromCharCode(c));return btoa(b);},
+  base64ToArrayBuffer(b64){const bin=atob(b64.replace(/-/g,'+').replace(/_/g,'/')),buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);return buf.buffer;},
+  async importKey(b64){return await crypto.subtle.importKey('raw',this.base64ToArrayBuffer(b64),{name:'AES-GCM'},false,['decrypt']);},
+  async decrypt(k,comb){const arr=new Uint8Array(comb),iv=arr.slice(0,12),ct=arr.slice(12),dec=await crypto.subtle.decrypt({name:'AES-GCM',iv},k,ct);return JSON.parse(new TextDecoder().decode(dec));}
+};
+
+// === SIGNATURE (utilise Crypto.toBase64) ===
+const Signature={
+  key:null,
+  async init(){
+    const enc=new TextEncoder();
+    // 🔐 SECRET (DOIT ÊTRE IDENTIQUE À generator.html)
+    this.key=await crypto.subtle.importKey('raw',enc.encode('K9#mP2$vL5@nQ8!rT1&wY4^jH7*bC0+zF3%hR6'),{name:'HMAC',hash:'SHA-256'},false,['sign','verify']);
+  },
+  async sign(data){
+    const enc=new TextEncoder();
+    const sig=await crypto.subtle.sign('HMAC',this.key,enc.encode(data));
+    return Crypto.toBase64(new Uint8Array(sig));
+  },
+  async verify(data,sig){return await this.sign(data)===sig;}
+};
+
+// === QR CODE ===
 function qrWifi(ssid,pwd){const q=qrcode(0,'M');q.addData(`WIFI:T:WPA;S:${ssid};P:${pwd};;`);q.make();return q.createImgTag(8);}
-function parseHash(h){if(h.includes(':::')){const p=h.split(':::');if(p.length===3)return{key:p[0],data:p[1],sig:p[2]};}const p=h.split(':');if(p.length===3)return{key:p[0],data:p[1],sig:p[2]};return{error:`${p.length} parties au lieu de 3`};}
-async function process(){await Signature.init();const c=$('content'),h=window.location.hash.substring(1).trim();if(h==='demo'){render({ssid:'ABtime_Demo',password:'Demo2026!',exp:Date.now()+180000,welcomeMsg:'Mode démo ! 🎉',themeColor:'#7c3aed'},true);return;}const p=parseHash(h);if(p.error){c.innerHTML=`<div class="status error">❌</div><h3>Lien invalide</h3><div class="debug">🔍 ${escapeHtml(p.error)}<br><br>💡 Copiez le lien intégralement<br>• Vérifiez que generator.html et connect.html ont le même secret<br>• Faites Ctrl+Shift+R pour vider le cache</div><br><button class="btn secondary" onclick="location.href='${CONFIG.BASE_URL}generator.html'">← Retour</button>`;return;}try{if(!await Signature.verify(p.key+':'+p.data,p.sig))throw new Error('Signature HMAC invalide');const k=await Crypto.importKey(p.key),enc=Crypto.base64ToArrayBuffer(p.data),data=await Crypto.decrypt(k,enc);if(Date.now()>data.exp){c.innerHTML=`<div class="status expired">⛔</div><h3>Expiré</h3><p class="meta">${new Date(data.exp).toLocaleString('fr-FR')}</p><button class="btn secondary" onclick="location.href='${CONFIG.BASE_URL}generator.html'">🔄 Nouveau</button>`;return;}render(data);}catch(e){console.error(e);c.innerHTML=`<div class="status error">⚠️</div><h3>Erreur</h3><div class="debug">🔍 ${escapeHtml(e.message)}<br><br>• Secret identique dans les 2 fichiers ?<br>• Lien copié sans modification ?<br>• Cache vidé (Ctrl+Shift+R) ?</div><br><button class="btn secondary" onclick="location.href='${CONFIG.BASE_URL}generator.html'">← Retour</button>`;}}
-function render(d,demo=false){const ts=new Date(d.exp).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});let custom='';if(d.custom&&d.welcomeMsg)custom+=`<div class="custom-msg">💬 ${escapeHtml(d.welcomeMsg)}</div>`;if(d.custom&&d.logoUrl)custom+=`<img src="${escapeHtml(d.logoUrl)}" class="logo-custom" onerror="this.style.display='none'">`;$('card').style.borderColor=d.themeColor||'#334155';$('content').innerHTML=`<div class="status valid">✅</div><h2 style="color:white;margin:10px 0">Ticket Valide</h2>${custom}<div class="qr-container">${qrWifi(d.ssid,d.password)}</div><div class="ssid">📶 ${escapeHtml(d.ssid)}</div><div class="password">🔐 <span id="pwd">${'•'.repeat(Math.min(d.password.length,20))}</span><button id="toggle" style="background:none;border:none;color:#7c3aed;cursor:pointer;font-size:1.2rem">👁</button></div><button class="btn" id="copy">📋 Copier</button><button class="btn secondary" onclick="navigator.share({title:'Wi-Fi ${escapeHtml(d.ssid)}',url:location.href}).catch(()=>{})">📤 Partager</button><p class="meta">⌛ ${ts}${demo?' • DÉMO':''}</p>`;let vis=false;$('toggle').onclick=()=>{vis=!vis;$('pwd').textContent=vis?d.password:'•'.repeat(Math.min(d.password.length,20));$('toggle').textContent=vis?'🙈':'👁';};$('copy').onclick=()=>navigator.clipboard.writeText(d.password).then(()=>showToast('Copié !'));}
+
+// === PARSING DU HASH (séparateur :::) ===
+function parseHash(h){
+  if(h.includes(':::')){const p=h.split(':::');if(p.length===3)return{key:p[0],data:p[1],sig:p[2]};}
+  const p=h.split(':');if(p.length===3)return{key:p[0],data:p[1],sig:p[2]};
+  return{error:`${p.length} parties au lieu de 3`};
+}
+
+// === TRAITEMENT PRINCIPAL ===
+async function process(){
+  await Signature.init();
+  const c=$('content'),h=window.location.hash.substring(1).trim();
+  
+  if(h==='demo'){render({ssid:'ABtime_Demo',password:'Demo2026!',exp:Date.now()+180000,welcomeMsg:'Mode démo ! 🎉',themeColor:'#7c3aed'},true);return;}
+  
+  const p=parseHash(h);
+  if(p.error){c.innerHTML=`<div class="status error">❌</div><h3>Lien invalide</h3><div class="debug">🔍 ${escapeHtml(p.error)}<br><br>💡 Copiez le lien intégralement<br>• Vérifiez que generator.html et connect.html ont le même secret<br>• Faites Ctrl+Shift+R pour vider le cache</div><br><button class="btn secondary" onclick="location.href='${CONFIG.BASE_URL}generator.html'">← Retour</button>`;return;}
+  
+  try{
+    if(!await Signature.verify(p.key+':'+p.data,p.sig))throw new Error('Signature HMAC invalide');
+    const k=await Crypto.importKey(p.key),enc=Crypto.base64ToArrayBuffer(p.data),data=await Crypto.decrypt(k,enc);
+    if(Date.now()>data.exp){c.innerHTML=`<div class="status expired">⛔</div><h3>Expiré</h3><p class="meta">${new Date(data.exp).toLocaleString('fr-FR')}</p><button class="btn secondary" onclick="location.href='${CONFIG.BASE_URL}generator.html'">🔄 Nouveau</button>`;return;}
+    render(data);
+  }catch(e){
+    console.error('❌',e);
+    c.innerHTML=`<div class="status error">⚠️</div><h3>Erreur</h3><div class="debug">🔍 ${escapeHtml(e.message)}<br><br>• Secret identique dans les 2 fichiers ?<br>• Lien copié sans modification ?<br>• Cache vidé (Ctrl+Shift+R) ?</div><br><button class="btn secondary" onclick="location.href='${CONFIG.BASE_URL}generator.html'">← Retour</button>`;
+  }
+}
+
+// === AFFICHAGE DU TICKET ===
+function render(d,demo=false){
+  const ts=new Date(d.exp).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  let custom='';
+  if(d.custom&&d.welcomeMsg)custom+=`<div class="custom-msg">💬 ${escapeHtml(d.welcomeMsg)}</div>`;
+  if(d.custom&&d.logoUrl)custom+=`<img src="${escapeHtml(d.logoUrl)}" class="logo-custom" onerror="this.style.display='none'">`;
+  
+  $('card').style.borderColor=d.themeColor||'#334155';
+  $('content').innerHTML=`<div class="status valid">✅</div><h2 style="color:white;margin:10px 0">Ticket Valide</h2>${custom}<div class="qr-container">${qrWifi(d.ssid,d.password)}</div><div class="ssid">📶 ${escapeHtml(d.ssid)}</div><div class="password">🔐 <span id="pwd">${'•'.repeat(Math.min(d.password.length,20))}</span><button id="toggle" style="background:none;border:none;color:#7c3aed;cursor:pointer;font-size:1.2rem">👁</button></div><button class="btn" id="copy">📋 Copier</button><button class="btn secondary" onclick="navigator.share({title:'Wi-Fi ${escapeHtml(d.ssid)}',url:location.href}).catch(()=>{})">📤 Partager</button><p class="meta">⌛ ${ts}${demo?' • DÉMO':''}</p>`;
+  
+  let vis=false;
+  $('toggle').onclick=()=>{vis=!vis;$('pwd').textContent=vis?d.password:'•'.repeat(Math.min(d.password.length,20));$('toggle').textContent=vis?'🙈':'👁';};
+  $('copy').onclick=()=>navigator.clipboard.writeText(d.password).then(()=>showToast('Copié !'));
+}
+
+// === INIT ===
 window.addEventListener('DOMContentLoaded',process);
 window.addEventListener('hashchange',process);
 </script>
