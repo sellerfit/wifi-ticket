@@ -6,572 +6,88 @@
 <title>ABtime • Générateur de Ticket Wi-Fi</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{
-  font-family:'Courier New',monospace;
-  min-height:100vh;
-  background:linear-gradient(135deg,#0f172a,#1e293b);
-  color:#e2e8f0;padding:20px;
-}
+body{font-family:'Courier New',monospace;min-height:100vh;background:linear-gradient(135deg,#0f172a,#1e293b);color:#e2e8f0;padding:20px}
 .container{max-width:700px;margin:0 auto}
-.card{
-  background:#1e293b;border-radius:20px;padding:25px;
-  box-shadow:0 20px 60px rgba(0,0,0,.3);margin-bottom:20px;
-  border:1px solid rgba(148,163,184,.2);
-}
+.card{background:#1e293b;border-radius:20px;padding:25px;box-shadow:0 20px 60px rgba(0,0,0,.3);margin-bottom:20px;border:1px solid rgba(148,163,184,.2)}
 .header{display:flex;align-items:center;gap:15px;margin-bottom:25px}
-.logo{
-  width:60px;height:60px;border-radius:16px;
-  background:linear-gradient(135deg,#7c3aed,#2563eb);
-  display:flex;align-items:center;justify-content:center;
-}
+.logo{width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,#7c3aed,#2563eb);display:flex;align-items:center;justify-content:center}
 .logo svg{width:35px;height:35px}
 .brand h2{font-size:1.5rem;color:white}
 .brand p{font-size:.85rem;color:#94a3b8}
-
 label{display:block;margin:15px 0 8px;font-weight:bold;color:#cbd5e1}
-input,select,textarea{
-  width:100%;padding:14px;border:2px solid #334155;
-  border-radius:12px;background:#0f172a;color:white;
-  font-size:1rem;font-family:inherit;
-}
-input:focus,select:focus,textarea:focus{
-  outline:none;border-color:#7c3aed;
-  box-shadow:0 0 0 4px rgba(124,58,237,.2);
-}
+input,select,textarea{width:100%;padding:14px;border:2px solid #334155;border-radius:12px;background:#0f172a;color:white;font-size:1rem;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#7c3aed;box-shadow:0 0 0 4px rgba(124,58,237,.2)}
 .row{display:flex;gap:12px}
 .row > *{flex:1}
 .toggle-row{display:flex;align-items:center;gap:10px;margin:10px 0}
 .toggle-row input{width:auto}
-
 .password-wrapper{position:relative}
-.toggle-pwd{
-  position:absolute;right:14px;top:50%;transform:translateY(-50%);
-  background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1.2rem;
-}
-
-.preview-box{
-  background:#0f172a;border:2px dashed #475569;
-  border-radius:12px;padding:15px;margin:15px 0;text-align:center;
-  min-height:60px;display:flex;align-items:center;justify-content:center;
-}
+.toggle-pwd{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1.2rem}
+.preview-box{background:#0f172a;border:2px dashed #475569;border-radius:12px;padding:15px;margin:15px 0;text-align:center;min-height:60px;display:flex;align-items:center;justify-content:center}
 .preview-box img{max-width:100%;border-radius:8px}
-
-.btn{
-  width:100%;padding:16px;border:none;border-radius:14px;
-  color:white;font-weight:bold;cursor:pointer;font-size:1rem;
-  margin:8px 0;transition:transform .2s;
-}
+.btn{width:100%;padding:16px;border:none;border-radius:14px;color:white;font-weight:bold;cursor:pointer;font-size:1rem;margin:8px 0;transition:transform .2s}
 .btn:hover{transform:translateY(-2px)}
 .primary{background:linear-gradient(135deg,#7c3aed,#2563eb)}
 .secondary{background:linear-gradient(135deg,#64748b,#475569)}
 .success{background:linear-gradient(135deg,#10b981,#059669)}
-
-.result{
-  display:none;margin-top:20px;padding:20px;
-  background:#0f172a;border-radius:14px;border:1px solid #334155;
-}
+.result{display:none;margin-top:20px;padding:20px;background:#0f172a;border-radius:14px;border:1px solid #334155}
 .result.show{display:block}
 .result h3{margin-bottom:12px;color:#7c3aed}
-.result-url{
-  word-break:break-all;background:#1e293b;padding:12px;
-  border-radius:8px;margin:10px 0;font-size:.9rem;cursor:pointer;
-}
+.result-url{word-break:break-all;background:#1e293b;padding:12px;border-radius:8px;margin:10px 0;font-size:.9rem;cursor:pointer}
 .result-url:hover{background:#334155}
-
 .history-list{max-height:300px;overflow-y:auto}
-.history-item{
-  padding:12px;border-bottom:1px solid #334155;
-  display:flex;justify-content:space-between;align-items:center;
-}
+.history-item{padding:12px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
 .history-item:last-child{border-bottom:none}
-.history-actions button{
-  padding:6px 12px;margin-left:5px;font-size:.85rem;
-}
-
-.modal{
-  display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-  background:rgba(0,0,0,.7);align-items:center;justify-content:center;z-index:1000;
-}
-.modal.show{display:flex}
-.modal-content{
-  background:#1e293b;padding:25px;border-radius:20px;
-  max-width:500px;width:90%;max-height:80vh;overflow-y:auto;
-  border:1px solid #334155;
-}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.close-modal{background:none;border:none;color:#94a3b8;font-size:1.5rem;cursor:pointer}
-
-.kofi{
-  position:fixed;bottom:20px;right:20px;
-  background:#ffdd00;color:#000;padding:12px 18px;
-  border-radius:12px;text-decoration:none;font-weight:bold;
-  box-shadow:0 8px 25px rgba(0,0,0,.3);z-index:100;
-}
-.toast{
-  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
-  background:#10b981;color:white;padding:12px 24px;
-  border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.3);
-  opacity:0;transition:opacity .3s;z-index:1000;pointer-events:none;
-}
+.history-actions button{padding:6px 12px;margin-left:5px;font-size:.85rem}
+.kofi{position:fixed;bottom:20px;right:20px;background:#ffdd00;color:#000;padding:12px 18px;border-radius:12px;text-decoration:none;font-weight:bold;box-shadow:0 8px 25px rgba(0,0,0,.3);z-index:100}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#10b981;color:white;padding:12px 24px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;transition:opacity .3s;z-index:1000;pointer-events:none}
 .toast.show{opacity:1}
-
 @media(max-width:600px){.row{flex-direction:column}}
 </style>
 </head>
 <body>
 <div class="container">
   <div class="card">
-    <div class="header">
-      <div class="logo">
-        <svg viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="44" fill="white" opacity=".2"/>
-          <path d="M28 62 L40 35 L50 55 L60 28 L72 62" 
-                fill="none" stroke="white" stroke-width="6" 
-                stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="50" cy="50" r="6" fill="white"/>
-        </svg>
-      </div>
-      <div class="brand">
-        <h2>ABtime</h2>
-        <p>Générateur de Ticket Wi-Fi</p>
-      </div>
-    </div>
-
-    <!-- Configuration réseau -->
-    <label>📶 Nom du réseau (SSID)</label>
-    <input type="text" id="ssid" placeholder="MonWiFi" maxlength="32">
-    
+    <div class="header"><div class="logo"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="white" opacity=".2"/><path d="M28 62 L40 35 L50 55 L60 28 L72 62" fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="50" r="6" fill="white"/></svg></div><div class="brand"><h2>ABtime</h2><p>Générateur de Ticket Wi-Fi</p></div></div>
+    <label>📶 Nom du réseau (SSID)</label><input type="text" id="ssid" placeholder="MonWiFi" maxlength="32">
     <label>🔐 Mot de passe</label>
-    <div class="password-wrapper">
-      <input type="password" id="password" placeholder="********" maxlength="63">
-      <button class="toggle-pwd" id="togglePwd">👁</button>
-    </div>
+    <div class="password-wrapper"><input type="password" id="password" placeholder="********" maxlength="63"><button class="toggle-pwd" id="togglePwd">👁</button></div>
     <small style="color:#94a3b8">WPA2 : 8-63 caractères ou 64 hex</small>
-
-    <!-- Expiration -->
     <label>⏳ Expiration</label>
-    <div class="row">
-      <select id="expType">
-        <option value="duration">Durée</option>
-        <option value="time">Heure fixe</option>
-      </select>
-      <select id="expValue">
-        <option value="15">15 minutes</option>
-        <option value="30">30 minutes</option>
-        <option value="60" selected>1 heure</option>
-        <option value="180">3 heures</option>
-        <option value="360">6 heures</option>
-        <option value="720">12 heures</option>
-        <option value="1440">24 heures</option>
-      </select>
-    </div>
-
-    <!-- Personnalisation -->
+    <div class="row"><select id="expType"><option value="duration">Durée</option><option value="time">Heure fixe</option></select><select id="expValue"><option value="15">15 min</option><option value="30">30 min</option><option value="60" selected>1h</option><option value="180">3h</option><option value="360">6h</option><option value="720">12h</option><option value="1440">24h</option></select></div>
     <label>🎨 Personnalisation</label>
-    <div class="toggle-row">
-      <input type="checkbox" id="enableCustom">
-      <span>Activer les options avancées</span>
-    </div>
+    <div class="toggle-row"><input type="checkbox" id="enableCustom"><span>Activer les options avancées</span></div>
     <div id="customOptions" style="display:none">
-      <label>🏷️ Message de bienvenue</label>
-      <input type="text" id="welcomeMsg" placeholder="Bienvenue chez nous !" maxlength="100">
-      
-      <label>🖼️ URL du logo (optionnel)</label>
-      <input type="url" id="logoUrl" placeholder="https://.../logo.png">
-      
-      <label>🎨 Couleur du thème</label>
-      <input type="color" id="themeColor" value="#7c3aed" style="height:45px;cursor:pointer">
-      
-      <label>👁️ Aperçu</label>
-      <div class="preview-box" id="logoPreview">Aucun logo sélectionné</div>
+      <label>🏷️ Message de bienvenue</label><input type="text" id="welcomeMsg" placeholder="Bienvenue chez nous !" maxlength="100">
+      <label>🖼️ URL du logo (HTTPS)</label><input type="url" id="logoUrl" placeholder="https://.../logo.png">
+      <label>🎨 Couleur du thème</label><input type="color" id="themeColor" value="#7c3aed" style="height:45px;cursor:pointer">
+      <label>👁️ Aperçu</label><div class="preview-box" id="logoPreview">Aucun logo sélectionné</div>
     </div>
-
-    <!-- Options supplémentaires -->
     <label>⚙️ Options</label>
-    <div class="toggle-row">
-      <input type="checkbox" id="useShortener" checked>
-      <span>Raccourcir l'URL (via is.gd)</span>
-    </div>
-    <div class="toggle-row">
-      <input type="checkbox" id="saveHistory" checked>
-      <span>Sauvegarder dans l'historique</span>
-    </div>
-
+    <div class="toggle-row"><input type="checkbox" id="useShortener" checked><span>Raccourcir l'URL (via TinyURL)</span></div>
+    <div class="toggle-row"><input type="checkbox" id="saveHistory" checked><span>Sauvegarder dans l'historique</span></div>
     <button class="btn primary" id="generateBtn">🎫 Générer le ticket</button>
     <button class="btn secondary" id="demoBtn">🧪 Mode démo (3 min)</button>
-
-    <!-- Résultat -->
-    <div class="result" id="result">
-      <h3>✅ Ticket généré !</h3>
-      <p style="color:#94a3b8;margin-bottom:10px">Cliquez sur le lien pour copier ou partager :</p>
-      <div class="result-url" id="resultUrl" title="Cliquez pour copier">Chargement...</div>
-      <button class="btn success" id="copyBtn">📋 Copier le lien</button>
-      <button class="btn secondary" id="openBtn">🔗 Ouvrir dans un nouvel onglet</button>
-    </div>
+    <div class="result" id="result"><h3>✅ Ticket généré !</h3><p style="color:#94a3b8;margin-bottom:10px">Cliquez sur le lien pour copier :</p><div class="result-url" id="resultUrl" title="Cliquez pour copier">Chargement...</div><button class="btn success" id="copyBtn">📋 Copier le lien</button><button class="btn secondary" id="openBtn">🔗 Ouvrir</button></div>
   </div>
-
-  <!-- Historique -->
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px">
-      <h3 style="color:white">📜 Historique</h3>
-      <button class="btn secondary" style="width:auto;padding:8px 16px;font-size:.9rem" id="clearHistory">Effacer</button>
-    </div>
-    <div class="history-list" id="historyList">
-      <p style="color:#64748b;text-align:center">Aucun ticket généré</p>
-    </div>
-  </div>
+  <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px"><h3 style="color:white">📜 Historique</h3><button class="btn secondary" style="width:auto;padding:8px 16px;font-size:.9rem" id="clearHistory">Effacer</button></div><div class="history-list" id="historyList"><p style="color:#64748b;text-align:center">Aucun ticket généré</p></div></div>
 </div>
-
-<!-- Modal Personnalisation Aide -->
-<div class="modal" id="helpModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3 style="color:white">💡 Conseils</h3>
-      <button class="close-modal" id="closeModal">&times;</button>
-    </div>
-    <ul style="color:#cbd5e1;line-height:1.8;margin-left:20px">
-      <li><strong>SSID</strong> : Nom visible du réseau Wi-Fi</li>
-      <li><strong>Mot de passe</strong> : 8-63 caractères pour WPA2</li>
-      <li><strong>Expiration</strong> : Le ticket devient invalide après</li>
-      <li><strong>Logo</strong> : URL HTTPS recommandée pour la sécurité</li>
-      <li><strong>URL courte</strong> : Plus facile à partager par SMS/QR</li>
-    </ul>
-  </div>
-</div>
-
 <div class="toast" id="toast">Copié !</div>
 <a href="https://ko-fi.com/sellerfit" target="_blank" class="kofi">☕ Ko-fi</a>
 
 <script>
-// === CONFIGURATION ===
-const CONFIG = {
-  SHORTENER_API: 'https://is.gd/create.php?format=simple&url=',
-  BASE_URL: window.location.href.replace(/generator\.html.*/, ''),
-  CONNECT_PAGE: 'connect.html',
-  HISTORY_KEY: 'abtime_history',
-  MAX_HISTORY: 20
-};
-
-// === UTILITAIRES ===
-const $ = id => document.getElementById(id);
-const showToast = msg => {
-  const t = $('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
-};
-
-const validateWifiPassword = pwd => {
-  if (pwd.length === 64 && /^[0-9A-Fa-f]{64}$/.test(pwd)) return true;
-  if (pwd.length >= 8 && pwd.length <= 63 && /^[\x20-\x7E]+$/.test(pwd)) return true;
-  return false;
-};
-
-const escapeHtml = str => {
-  const d = document.createElement('div');
-  d.textContent = str;
-  return d.innerHTML;
-};
-
-// === CRYPTO (Web Crypto API) ===
-const Crypto = {
-  async generateKey() {
-    return await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
-  },
-  
-  async exportKey(key) {
-    const raw = await crypto.subtle.exportKey('raw', key);
-    return this.toBase64(new Uint8Array(raw));
-  },
-  
-  async importKey(base64) {
-    const raw = this.base64ToArrayBuffer(base64);
-    return await crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['decrypt']);
-  },
-  
-  async encrypt(key, data) {
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const encoded = new TextEncoder().encode(JSON.stringify(data));
-    const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
-    const combined = new Uint8Array(iv.length + encrypted.byteLength);
-    combined.set(iv);
-    combined.set(new Uint8Array(encrypted), iv.length);
-    return combined;
-  },
-  
-  async decrypt(key, combined) {
-    const arr = new Uint8Array(combined);
-    const iv = arr.slice(0, 12);
-    const ct = arr.slice(12);
-    const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
-    return JSON.parse(new TextDecoder().decode(decrypted));
-  },
-  
-  toBase64(buf) {
-    let binary = '';
-    buf.forEach(b => binary += String.fromCharCode(b));
-    return btoa(binary);
-  },
-  
-  fromBase64(b64) {
-    const binary = atob(b64);
-    const buf = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) buf[i] = binary.charCodeAt(i);
-    return buf.buffer;
-  },
-  
-  base64ToArrayBuffer(b64) {
-    return this.fromBase64(b64);
-  }
-};
-
-// === SIGNATURE HMAC (intégrité) ===
-const Signature = {
-  key: null,
-  
-  async init() {
-    // Clé dérivée d'un secret + timestamp pour rotation
-    const encoder = new TextEncoder();
-    const baseKey = await crypto.subtle.importKey('raw', encoder.encode('ABtime_Secret_2026'), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']);
-    this.key = baseKey;
-  },
-  
-  async sign(data) {
-    const encoder = new TextEncoder();
-    const signature = await crypto.subtle.sign('HMAC', this.key, encoder.encode(data));
-    return Crypto.toBase64(new Uint8Array(signature));
-  },
-  
-  async verify(data, signature) {
-    const expected = await this.sign(data);
-    return expected === signature;
-  }
-};
-
-// === HISTORIQUE (localStorage) ===
-const History = {
-  load() {
-    try {
-      const raw = localStorage.getItem(CONFIG.HISTORY_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch { return []; }
-  },
-  
-  save(entry) {
-    const list = this.load();
-    list.unshift({ ...entry, id: Date.now(), date: new Date().toISOString() });
-    while (list.length > CONFIG.MAX_HISTORY) list.pop();
-    localStorage.setItem(CONFIG.HISTORY_KEY, JSON.stringify(list));
-    this.render();
-  },
-  
-  remove(id) {
-    const list = this.load().filter(i => i.id !== id);
-    localStorage.setItem(CONFIG.HISTORY_KEY, JSON.stringify(list));
-    this.render();
-  },
-  
-  clear() {
-    localStorage.removeItem(CONFIG.HISTORY_KEY);
-    this.render();
-  },
-  
-  render() {
-    const list = $('historyList');
-    const items = this.load();
-    
-    if (items.length === 0) {
-      list.innerHTML = '<p style="color:#64748b;text-align:center">Aucun ticket généré</p>';
-      return;
-    }
-    
-    list.innerHTML = items.map(item => `
-      <div class="history-item">
-        <div>
-          <strong style="color:white">${escapeHtml(item.ssid)}</strong>
-          <div style="font-size:.85rem;color:#94a3b8">
-            ${new Date(item.date).toLocaleString('fr-FR')} • 
-            ${item.shortUrl ? '🔗 Court' : '🔗 Long'}
-          </div>
-        </div>
-        <div class="history-actions">
-          <button class="btn secondary" onclick="History.reuse('${item.id}')">🔄 Réutiliser</button>
-          <button class="btn" style="background:#ef4444" onclick="History.remove('${item.id}')">🗑️</button>
-        </div>
-      </div>
-    `).join('');
-  },
-  
-  reuse(id) {
-    const item = this.load().find(i => i.id == id);
-    if (item) {
-      $('ssid').value = item.ssid;
-      $('password').value = item.password;
-      $('expType').value = item.expType;
-      $('expValue').value = item.expValue;
-      if (item.custom) {
-        $('enableCustom').checked = true;
-        $('customOptions').style.display = 'block';
-        $('welcomeMsg').value = item.welcomeMsg || '';
-        $('logoUrl').value = item.logoUrl || '';
-        $('themeColor').value = item.themeColor || '#7c3aed';
-      }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }
-};
-
-// === RACCOURCISSEUR D'URL ===
-const UrlShortener = {
-  async shorten(longUrl) {
-    try {
-      const response = await fetch(CONFIG.SHORTENER_API + encodeURIComponent(longUrl));
-      if (response.ok) {
-        const shortUrl = await response.text();
-        return shortUrl.trim();
-      }
-    } catch (e) {
-      console.warn('Shortener error:', e);
-    }
-    return longUrl; // Fallback
-  }
-};
-
-// === GÉNÉRATION DU TICKET ===
-async function generateTicket(isDemo = false) {
-  const ssid = $('ssid').value.trim();
-  const password = $('password').value.trim();
-  
-  // Validation
-  if (!ssid || !password) {
-    alert('⚠️ Veuillez remplir le SSID et le mot de passe');
-    return;
-  }
-  if (!validateWifiPassword(password)) {
-    if (!confirm('⚠️ Mot de passe non conforme WPA2. Continuer quand même ?')) return;
-  }
-  
-  // Expiration
-  const expType = $('expType').value;
-  const expValue = parseInt($('expValue').value);
-  let exp;
-  if (isDemo) {
-    exp = Date.now() + 3 * 60 * 1000; // 3 minutes
-  } else if (expType === 'duration') {
-    exp = Date.now() + expValue * 60 * 1000;
-  } else {
-    const d = new Date();
-    d.setHours(d.getHours() + expValue);
-    exp = d.getTime();
-  }
-  
-  // Personnalisation
-  const custom = $('enableCustom').checked;
-  const payload = {
-    ssid, password, exp,
-    custom,
-    welcomeMsg: custom ? $('welcomeMsg').value.trim() : '',
-    logoUrl: custom ? $('logoUrl').value.trim() : '',
-    themeColor: custom ? $('themeColor').value : '#7c3aed',
-    version: '2.0'
-  };
-  
-  // Chiffrement + Signature
-  const key = await Crypto.generateKey();
-  const encrypted = await Crypto.encrypt(key, payload);
-  const key64 = await Crypto.exportKey(key);
-  const data64 = Crypto.toBase64(new Uint8Array(encrypted));
-  const signature = await Signature.sign(key64 + ':' + data64);
-  
-  // Construction du lien
-  const hash = `${key64}:${data64}:${signature}`;
-  const longUrl = `${CONFIG.BASE_URL}${CONFIG.CONNECT_PAGE}#${hash}`;
-  
-  // Raccourcissement optionnel
-  let finalUrl = longUrl;
-  if ($('useShortener').checked && !isDemo) {
-    $('resultUrl').textContent = '🔄 Raccourcissement en cours...';
-    finalUrl = await UrlShortener.shorten(longUrl);
-  }
-  
-  // Affichage
-  $('resultUrl').textContent = finalUrl;
-  $('result').classList.add('show');
-  
-  // Sauvegarde historique
-  if ($('saveHistory').checked) {
-    History.save({
-      ssid, password, expType, expValue, custom,
-      welcomeMsg: payload.welcomeMsg, logoUrl: payload.logoUrl, themeColor: payload.themeColor,
-      url: finalUrl, shortUrl: finalUrl !== longUrl
-    });
-  }
-  
-  showToast('Ticket généré !');
-}
-
-// === EVENT LISTENERS ===
-document.addEventListener('DOMContentLoaded', async () => {
-  await Signature.init();
-  History.render();
-  
-  // Toggle mot de passe
-  $('togglePwd').onclick = () => {
-    const pwd = $('password');
-    pwd.type = pwd.type === 'password' ? 'text' : 'password';
-    $('togglePwd').textContent = pwd.type === 'password' ? '👁' : '🙈';
-  };
-  
-  // Toggle personnalisation
-  $('enableCustom').onchange = e => {
-    $('customOptions').style.display = e.target.checked ? 'block' : 'none';
-  };
-  
-  // Aperçu logo
-  $('logoUrl').oninput = e => {
-    const preview = $('logoPreview');
-    if (e.target.value) {
-      preview.innerHTML = `<img src="${escapeHtml(e.target.value)}" alt="Logo" onerror="this.parentElement.textContent='❌ Image invalide'">`;
-    } else {
-      preview.textContent = 'Aucun logo sélectionné';
-    }
-  };
-  
-  // Génération
-  $('generateBtn').onclick = () => generateTicket(false);
-  $('demoBtn').onclick = () => generateTicket(true);
-  
-  // Copie du lien
-  $('copyBtn').onclick = () => {
-    navigator.clipboard.writeText($('resultUrl').textContent).then(() => showToast('Lien copié !'));
-  };
-  
-  // Ouvrir dans nouvel onglet
-  $('openBtn').onclick = () => window.open($('resultUrl').textContent, '_blank');
-  
-  // Historique
-  $('clearHistory').onclick = () => {
-    if (confirm('Effacer tout l\'historique ?')) History.clear();
-  };
-  
-  // Modal aide
-  $('closeModal').onclick = () => $('helpModal').classList.remove('show');
-  
-  // Copie au clic sur l'URL
-  $('resultUrl').onclick = () => {
-    navigator.clipboard.writeText($('resultUrl').textContent).then(() => showToast('Copié !'));
-  };
-  
-  // Démo directe via hash
-  if (location.hash === '#demo') {
-    $('ssid').value = 'ABtime_Demo';
-    $('password').value = 'Demo2026!';
-    generateTicket(true);
-  }
-});
-
-// Expose History for inline onclick
-window.History = History;
+const CONFIG={SHORTENER_API:'https://tinyurl.com/api-create.php?url=',BASE_URL:window.location.href.replace(/generator\.html.*/,''),CONNECT_PAGE:'connect.html',HISTORY_KEY:'abtime_history',MAX_HISTORY:20};
+const $=id=>document.getElementById(id);
+const showToast=msg=>{const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);};
+const validateWifiPassword=pwd=>{if(pwd.length===64&&/^[0-9A-Fa-f]{64}$/.test(pwd))return true;if(pwd.length>=8&&pwd.length<=63&&/^[\x20-\x7E]+$/.test(pwd))return true;return false;};
+const escapeHtml=str=>{const d=document.createElement('div');d.textContent=str;return d.innerHTML;};
+const Crypto={async generateKey(){return await crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt']);},async exportKey(key){const raw=await crypto.subtle.exportKey('raw',key);return this.toBase64(new Uint8Array(raw));},async importKey(base64){return await crypto.subtle.importKey('raw',this.fromBase64(base64),{name:'AES-GCM'},false,['decrypt']);},async encrypt(key,data){const iv=crypto.getRandomValues(new Uint8Array(12));const encoded=new TextEncoder().encode(JSON.stringify(data));const encrypted=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,encoded);const combined=new Uint8Array(iv.length+encrypted.byteLength);combined.set(iv);combined.set(new Uint8Array(encrypted),iv.length);return combined;},async decrypt(key,combined){const arr=new Uint8Array(combined);const iv=arr.slice(0,12);const ct=arr.slice(12);const decrypted=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct);return JSON.parse(new TextDecoder().decode(decrypted));},toBase64(buf){let b='';buf.forEach(c=>b+=String.fromCharCode(c));return btoa(b);},fromBase64(b64){const bin=atob(b64);const buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);return buf.buffer;}};
+const Signature={key:null,async init(){const encoder=new TextEncoder();const baseKey=await crypto.subtle.importKey('raw',encoder.encode('K9#mP2$vL5@nQ8!rT1&wY4^jH7*bC0+zF3%hR6'),{name:'HMAC',hash:'SHA-256'},false,['sign','verify']);this.key=baseKey;},async sign(data){const encoder=new TextEncoder();const sig=await crypto.subtle.sign('HMAC',this.key,encoder.encode(data));return Crypto.toBase64(new Uint8Array(sig));},async verify(data,signature){const expected=await this.sign(data);return expected===signature;}};
+const History={load(){try{return JSON.parse(localStorage.getItem(CONFIG.HISTORY_KEY)||'[]');}catch{return[];}},save(entry){const list=this.load();list.unshift({...entry,id:Date.now(),date:new Date().toISOString()});while(list.length>CONFIG.MAX_HISTORY)list.pop();localStorage.setItem(CONFIG.HISTORY_KEY,JSON.stringify(list));this.render();},remove(id){const list=this.load().filter(i=>i.id!=id);localStorage.setItem(CONFIG.HISTORY_KEY,JSON.stringify(list));this.render();},clear(){localStorage.removeItem(CONFIG.HISTORY_KEY);this.render();},render(){const list=$('historyList');const items=this.load();if(items.length===0){list.innerHTML='<p style="color:#64748b;text-align:center">Aucun ticket généré</p>';return;}list.innerHTML=items.map(item=>`<div class="history-item"><div><strong style="color:white">${escapeHtml(item.ssid)}</strong><div style="font-size:.85rem;color:#94a3b8">${new Date(item.date).toLocaleString('fr-FR')} • ${item.shortUrl?'🔗 Court':'🔗 Long'}</div></div><div class="history-actions"><button class="btn secondary" onclick="History.reuse(${item.id})">🔄</button><button class="btn" style="background:#ef4444" onclick="History.remove(${item.id})">🗑️</button></div></div>`).join('');},reuse(id){const item=this.load().find(i=>i.id==id);if(item){$('ssid').value=item.ssid;$('password').value=item.password;$('expType').value=item.expType;$('expValue').value=item.expValue;if(item.custom){$('enableCustom').checked=true;$('customOptions').style.display='block';$('welcomeMsg').value=item.welcomeMsg||'';$('logoUrl').value=item.logoUrl||'';$('themeColor').value=item.themeColor||'#7c3aed';}window.scrollTo({top:0,behavior:'smooth'});}}};
+const UrlShortener={async shorten(longUrl){if(!CONFIG.SHORTENER_API)return longUrl;try{const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),8000);const res=await fetch(CONFIG.SHORTENER_API+encodeURIComponent(longUrl),{signal:controller.signal,mode:'cors'});clearTimeout(timeout);if(res.ok){const short=await res.text();if(short&&short.trim().startsWith('http'))return short.trim();}}catch(e){console.warn('⚠️ Raccourcissement échoué :',e.message);}return longUrl;}};
+async function generateTicket(isDemo=false){const ssid=$('ssid').value.trim(),pwd=$('password').value.trim();if(!ssid||!pwd){alert('⚠️ Veuillez remplir le SSID et le mot de passe');return;}if(!validateWifiPassword(pwd)&&!confirm('⚠️ Mot de passe non conforme WPA2. Continuer ?'))return;const expType=$('expType').value,expVal=parseInt($('expValue').value);let exp=isDemo?Date.now()+3*60*1000:(expType==='duration'?Date.now()+expVal*60*1000:(()=>{const d=new Date();d.setHours(d.getHours()+expVal);return d.getTime()})());const custom=$('enableCustom').checked;const payload={ssid,password:pwd,exp,custom,welcomeMsg:custom?$('welcomeMsg').value.trim():'',logoUrl:custom?$('logoUrl').value.trim():'',themeColor:custom?$('themeColor').value:'#7c3aed',version:'2.0'};const key=await Crypto.generateKey(),enc=await Crypto.encrypt(key,payload),key64=await Crypto.exportKey(key),data64=Crypto.toBase64(new Uint8Array(enc));const sig=await Signature.sign(key64+':'+data64);const longUrl=`${CONFIG.BASE_URL}${CONFIG.CONNECT_PAGE}#${key64}:${data64}:${sig}`;$('resultUrl').textContent='🔄 Raccourcissement...';let finalUrl=await UrlShortener.shorten(longUrl);$('resultUrl').textContent=finalUrl;$('result').classList.add('show');if($('saveHistory').checked)History.save({ssid,password:pwd,expType,expValue:expVal,custom,welcomeMsg:payload.welcomeMsg,logoUrl:payload.logoUrl,themeColor:payload.themeColor,url:finalUrl,shortUrl:finalUrl!==longUrl});showToast(finalUrl===longUrl?'Ticket généré (lien long)':'Ticket généré (URL courte) !');}
+document.addEventListener('DOMContentLoaded',async()=>{await Signature.init();History.render();$('togglePwd').onclick=()=>{const p=$('password');p.type=p.type==='password'?'text':'password';$('togglePwd').textContent=p.type==='password'?'👁':'🙈';};$('enableCustom').onchange=e=>{$('customOptions').style.display=e.target.checked?'block':'none';};$('logoUrl').oninput=e=>{const pv=$('logoPreview');pv.innerHTML=e.target.value?`<img src="${escapeHtml(e.target.value)}" alt="Logo" onerror="this.parentElement.textContent='❌ Image invalide'">`:'Aucun logo sélectionné';};$('generateBtn').onclick=()=>generateTicket(false);$('demoBtn').onclick=()=>generateTicket(true);$('copyBtn').onclick=()=>navigator.clipboard.writeText($('resultUrl').textContent).then(()=>showToast('Lien copié !'));$('openBtn').onclick=()=>window.open($('resultUrl').textContent,'_blank');$('clearHistory').onclick=()=>{if(confirm('Effacer tout ?'))History.clear();};$('resultUrl').onclick=()=>navigator.clipboard.writeText($('resultUrl').textContent).then(()=>showToast('Copié !'));if(location.hash==='#demo'){$('ssid').value='ABtime_Demo';$('password').value='Demo2026!';generateTicket(true);}});
+window.History=History;
 </script>
 </body>
 </html>
