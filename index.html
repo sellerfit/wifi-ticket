@@ -2,8 +2,8 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-<title>Wi-Fi Ticket · Édition Apéro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wi-Fi Ticket</title>
 
 <style>
 *{
@@ -13,111 +13,139 @@
 }
 
 body{
-    background:linear-gradient(135deg,#0f172a 0%,#1e293b 40%,#7c3aed 100%);
-    background-size:200% 200%;
-    animation:bgMove 10s ease infinite;
     min-height:100vh;
     display:flex;
-    align-items:center;
     justify-content:center;
-    font-family:'Courier New', Courier, monospace;
-    padding:16px;
-}
-
-@keyframes bgMove{
-    0%{background-position:0% 50%}
-    50%{background-position:100% 50%}
-    100%{background-position:0% 50%}
+    align-items:center;
+    background:linear-gradient(135deg,#0f172a,#7c3aed);
+    font-family:'Courier New', monospace;
+    padding:20px;
 }
 
 .ticket{
-    max-width:500px;
     width:100%;
+    max-width:520px;
     background:white;
-    padding:30px 20px;
-    border-radius:20px;
+    border-radius:22px;
+    padding:30px;
     box-shadow:0 20px 60px rgba(0,0,0,0.25);
 }
 
 h1{
     text-align:center;
-    margin-bottom:20px;
+    margin-bottom:25px;
     color:#4c1d95;
+    font-size:2rem;
 }
 
 .input-group{
-    margin:18px 0;
+    margin-bottom:22px;
 }
 
-.input-group label{
+label{
     display:block;
-    font-weight:bold;
     margin-bottom:8px;
+    font-weight:bold;
     color:#334155;
     font-size:0.95rem;
 }
 
-.input-group input,
-.input-group select{
+.input-box{
+    position:relative;
+}
+
+input,
+select{
     width:100%;
-    padding:14px;
+    padding:16px;
     border:2px solid #cbd5e1;
     border-radius:14px;
     font-size:1rem;
-    font-family:'Courier New', Courier, monospace;
+    background:#f8fafc;
+    transition:0.2s;
 }
 
-.input-group input:focus,
-.input-group select:focus{
+input:focus,
+select:focus{
     outline:none;
     border-color:#7c3aed;
     box-shadow:0 0 0 4px rgba(124,58,237,0.15);
 }
 
+.password-toggle{
+    position:absolute;
+    right:12px;
+    top:50%;
+    transform:translateY(-50%);
+    background:none;
+    border:none;
+    cursor:pointer;
+    font-size:1rem;
+}
+
+.expiry-wrapper{
+    background:#f8fafc;
+    border:2px solid #cbd5e1;
+    border-radius:14px;
+    padding:12px;
+}
+
 .expiry-row{
     display:flex;
     align-items:center;
+    justify-content:center;
     gap:12px;
 }
 
 .expiry-row select{
-    flex:1;
+    width:120px;
+    text-align:center;
+    font-size:1.1rem;
+    background:white;
 }
 
 .time-separator{
-    font-size:1.4rem;
+    font-size:1.6rem;
     font-weight:bold;
+    color:#475569;
 }
 
 .time-hint{
-    margin-top:8px;
-    font-size:0.75rem;
+    text-align:center;
+    margin-top:10px;
+    font-size:0.8rem;
     color:#64748b;
 }
 
 .btn{
     width:100%;
-    padding:14px;
+    padding:16px;
     border:none;
     border-radius:14px;
-    cursor:pointer;
     color:white;
     font-weight:bold;
-    margin-top:10px;
+    cursor:pointer;
+    margin-top:12px;
+    font-size:1rem;
+}
+
+.primary{
     background:linear-gradient(135deg,#7c3aed,#2563eb);
 }
 
-.btn.secondary{
+.secondary{
     background:linear-gradient(135deg,#f59e0b,#ef4444);
 }
 
 #previewUrl{
-    margin-top:15px;
+    margin-top:20px;
     display:none;
-    padding:12px;
-    border:1px solid #7c3aed;
-    border-radius:12px;
+    background:#f8fafc;
+    border:2px solid #7c3aed;
+    padding:14px;
+    border-radius:14px;
     word-break:break-all;
+    cursor:pointer;
 }
 </style>
 </head>
@@ -128,48 +156,62 @@ h1{
     <h1>🎫 WIFI TICKET</h1>
 
     <div class="input-group">
-        <label for="ssid">📶 Nom du réseau Wi-Fi</label>
+        <label>📶 Nom du réseau Wi-Fi</label>
         <input
             type="text"
             id="ssid"
-            placeholder="Ex : Livebox-1234"
             value="MonWiFi"
+            placeholder="Ex : Livebox-1234"
         >
     </div>
 
     <div class="input-group">
-        <label for="password">🔐 Mot de passe</label>
-        <input
-            type="text"
-            id="password"
-            placeholder="Ex : Bienvenue2026!"
-            value="BienvenueChezMoi"
-        >
+        <label>🔐 Mot de passe</label>
+
+        <div class="input-box">
+            <input
+                type="password"
+                id="password"
+                value="BienvenueChezMoi"
+                placeholder="Votre mot de passe"
+            >
+
+            <button class="password-toggle" id="togglePassword">
+                👁
+            </button>
+        </div>
     </div>
 
     <div class="input-group">
-        <label for="expiryHour">⏳ Heure d’expiration</label>
+        <label>⏳ Heure d’expiration</label>
 
-        <div class="expiry-row">
-            <select id="expiryHour"></select>
+        <div class="expiry-wrapper">
+            <div class="expiry-row">
+                <select id="expiryHour"></select>
 
-            <span class="time-separator">:</span>
+                <span class="time-separator">:</span>
 
-            <select id="expiryMinute">
-                <option value="0">00</option>
-                <option value="15">15</option>
-                <option value="30">30</option>
-                <option value="45">45</option>
-            </select>
-        </div>
+                <select id="expiryMinute">
+                    <option value="0">00</option>
+                    <option value="15">15</option>
+                    <option value="30">30</option>
+                    <option value="45">45</option>
+                </select>
+            </div>
 
-        <div class="time-hint">
-            Le ticket sera invalide après cette heure
+            <div class="time-hint">
+                Le ticket expirera automatiquement
+            </div>
         </div>
     </div>
 
-    <button class="btn" id="generateBtn">🎫 GÉNÉRER</button>
-    <button class="btn secondary" id="demoBtn">🧪 DÉMO 3 MIN</button>
+    <button class="btn primary" id="generateBtn">
+        🎫 GÉNÉRER
+    </button>
+
+    <button class="btn secondary" id="demoBtn">
+        🧪 DÉMO 3 MIN
+    </button>
 
     <div id="previewUrl"></div>
 
@@ -181,13 +223,19 @@ h1{
     const hourSelect=document.getElementById('expiryHour');
 
     for(let h=0;h<24;h++){
-        let o=document.createElement('option');
-        o.value=h;
-        o.textContent=h.toString().padStart(2,'0');
-        hourSelect.appendChild(o);
+        let option=document.createElement('option');
+        option.value=h;
+        option.textContent=h.toString().padStart(2,'0');
+        hourSelect.appendChild(option);
     }
 
     hourSelect.value='23';
+
+    document.getElementById('togglePassword').onclick=function(){
+        const pwd=document.getElementById('password');
+
+        pwd.type=pwd.type==='password' ? 'text' : 'password';
+    };
 
     async function generateKey(){
         return await crypto.subtle.generateKey(
@@ -199,17 +247,18 @@ h1{
 
     async function encryptData(key,text){
         const iv=crypto.getRandomValues(new Uint8Array(12));
-        const enc=new TextEncoder().encode(text);
+        const encoded=new TextEncoder().encode(text);
 
-        const cipher=await crypto.subtle.encrypt(
+        const encrypted=await crypto.subtle.encrypt(
             {name:"AES-GCM",iv},
             key,
-            enc
+            encoded
         );
 
-        const combined=new Uint8Array(iv.length+cipher.byteLength);
+        const combined=new Uint8Array(iv.length+encrypted.byteLength);
+
         combined.set(iv,0);
-        combined.set(new Uint8Array(cipher),iv.length);
+        combined.set(new Uint8Array(encrypted),iv.length);
 
         return combined;
     }
@@ -230,31 +279,31 @@ h1{
     }
 
     function getDemoExpiry(){
-        return Date.now()+3*60*1000;
+        return Date.now()+180000;
     }
 
-    async function createEncryptedLink(ssid,pwd,expiry){
-        const payload=JSON.stringify({ssid,pwd,exp:expiry});
+    async function createLink(ssid,pwd,exp){
+        const payload=JSON.stringify({ssid,pwd,exp});
 
         const key=await generateKey();
         const encrypted=await encryptData(key,payload);
 
-        const encB64=toBase64(encrypted);
-        const keyB64=await exportKey(key);
+        const key64=await exportKey(key);
+        const data64=toBase64(encrypted);
 
         const base=window.location.href
             .replace(/index\.html$/,'')
             .replace(/\/$/,'');
 
-        return base+'/connect.html#'+keyB64+':'+encB64;
+        return base+'/connect.html#'+key64+':'+data64;
     }
 
-    async function generateAndShow(demo){
+    async function generate(demo){
         const ssid=document.getElementById('ssid').value.trim();
         const pwd=document.getElementById('password').value.trim();
 
         if(!ssid||!pwd){
-            alert('Remplissez les champs');
+            alert('Veuillez remplir les champs');
             return;
         }
 
@@ -265,23 +314,21 @@ h1{
                 parseInt(document.getElementById('expiryMinute').value)
             );
 
-        const link=await createEncryptedLink(ssid,pwd,exp);
+        const link=await createLink(ssid,pwd,exp);
 
-        const prev=document.getElementById('previewUrl');
-        prev.style.display='block';
-        prev.innerHTML=link;
+        const preview=document.getElementById('previewUrl');
 
-        prev.onclick=()=>{
+        preview.style.display='block';
+        preview.innerHTML='🔗 '+link;
+
+        preview.onclick=()=>{
             navigator.clipboard.writeText(link)
-                .then(()=>alert('Lien copié !'));
+                .then(()=>alert('Lien copié'));
         };
     }
 
-    document.getElementById('generateBtn')
-        .addEventListener('click',()=>generateAndShow(false));
-
-    document.getElementById('demoBtn')
-        .addEventListener('click',()=>generateAndShow(true));
+    document.getElementById('generateBtn').onclick=()=>generate(false);
+    document.getElementById('demoBtn').onclick=()=>generate(true);
 
 })();
 </script>
