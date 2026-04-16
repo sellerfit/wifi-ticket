@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ABtime • Connexion</title>
+<title>Connexion Wi-Fi</title>
+
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+
 <style>
 body{
     min-height:100vh;
@@ -12,9 +14,10 @@ body{
     justify-content:center;
     align-items:center;
     background:#1e293b;
-    font-family:Arial,sans-serif;
+    font-family:'Courier New', monospace;
     padding:20px;
 }
+
 .card{
     background:white;
     max-width:500px;
@@ -22,32 +25,30 @@ body{
     padding:30px;
     border-radius:20px;
     text-align:center;
+    box-shadow:0 20px 50px rgba(0,0,0,0.25);
 }
-.logo{
-    margin-bottom:20px;
+
+#qrcode{
+    margin:20px 0;
+}
+
+.ssid{
+    font-size:1.4rem;
+    font-weight:bold;
+    margin:15px 0;
+    color:#4c1d95;
+}
+
+.password{
+    font-size:1.1rem;
+    margin:15px 0;
+    color:#334155;
 }
 </style>
 </head>
 <body>
+
 <div class="card">
-
-    <div class="logo">
-        <svg viewBox="0 0 100 100" width="72" height="72">
-            <defs>
-                <linearGradient id="abGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#7c3aed"/>
-                    <stop offset="100%" stop-color="#2563eb"/>
-                </linearGradient>
-            </defs>
-            <circle cx="50" cy="50" r="44" fill="url(#abGradient2)"/>
-            <path d="M28 62 L40 35 L50 55 L60 28 L72 62"
-                fill="none"
-                stroke="white"
-                stroke-width="6"/>
-        </svg>
-        <h1 style="color:#7c3aed;">ABtime</h1>
-    </div>
-
     <div id="dynamicContent">Chargement...</div>
 </div>
 
@@ -57,7 +58,11 @@ body{
 function base64ToArrayBuffer(base64){
     const binary=atob(base64);
     const bytes=new Uint8Array(binary.length);
-    for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+
+    for(let i=0;i<binary.length;i++){
+        bytes[i]=binary.charCodeAt(i);
+    }
+
     return bytes.buffer;
 }
 
@@ -96,7 +101,13 @@ function generateWifiQR(ssid,pwd){
 
 async function processTicket(){
     const hash=window.location.hash.substring(1);
+
     const separator=hash.indexOf(':');
+
+    if(separator===-1){
+        document.getElementById('dynamicContent').innerHTML='Ticket invalide';
+        return;
+    }
 
     const keyPart=hash.substring(0,separator);
     const dataPart=hash.substring(separator+1);
@@ -104,16 +115,28 @@ async function processTicket(){
     try{
         const key=await importKey(keyPart);
         const decrypted=await decryptData(key,dataPart);
+
         const data=JSON.parse(decrypted);
+
+        if(Date.now()>data.exp){
+            document.getElementById('dynamicContent').innerHTML='⛔ Expiré';
+            return;
+        }
+
+        const timeStr=new Date(data.exp).toLocaleTimeString('fr-FR',{
+            hour:'2-digit',
+            minute:'2-digit'
+        });
 
         document.getElementById('dynamicContent').innerHTML=`
             <h2>✅ VALIDE</h2>
-            <div>${generateWifiQR(data.ssid,data.pwd)}</div>
-            <p>📶 ${data.ssid}</p>
-            <p>🔐 ${data.pwd}</p>
+            <div id="qrcode">${generateWifiQR(data.ssid,data.pwd)}</div>
+            <div class="ssid">📶 ${data.ssid}</div>
+            <div class="password">🔐 ${data.pwd}</div>
+            <div>⌛ Expire à ${timeStr}</div>
         `;
     }catch{
-        document.getElementById('dynamicContent').innerHTML='Ticket invalide';
+        document.getElementById('dynamicContent').innerHTML='Ticket corrompu';
     }
 }
 
@@ -121,5 +144,6 @@ window.addEventListener('DOMContentLoaded',processTicket);
 
 })();
 </script>
+
 </body>
 </html>
