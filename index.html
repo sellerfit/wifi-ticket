@@ -1,276 +1,217 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wi-Fi Ticket · Générateur</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>Wi-Fi Ticket · Édition Apéro</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+body{
+    background:linear-gradient(135deg,#0f172a 0%,#1e293b 40%,#7c3aed 100%);
+    background-size:200% 200%;
+    animation:bgMove 10s ease infinite;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Courier New', Courier, monospace;
+    padding:16px;
+}
 
-    body {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      font-family: 'Courier New', monospace;
-      background: linear-gradient(135deg, #0f172a, #7c3aed);
-    }
+@keyframes bgMove{
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
 
-    .ticket {
-      width: 100%;
-      max-width: 520px;
-      background: white;
-      padding: 28px;
-      border-radius: 18px;
-      box-shadow: 0 15px 40px rgba(0,0,0,.35);
-    }
+.ticket{
+    max-width:500px;
+    width:100%;
+    background:white;
+    padding:30px 20px;
+    border-radius:20px;
+}
 
-    h1 {
-      text-align: center;
-      color: #4c1d95;
-      margin-bottom: 10px;
-    }
+.btn{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:14px;
+    cursor:pointer;
+    color:white;
+    font-weight:bold;
+    margin-top:10px;
+    background:linear-gradient(135deg,#7c3aed,#2563eb);
+}
 
-    .subhead {
-      text-align: center;
-      margin-bottom: 24px;
-      color: #64748b;
-      font-size: .85rem;
-    }
+.btn.secondary{
+    background:linear-gradient(135deg,#f59e0b,#ef4444);
+}
 
-    .input-group {
-      margin-bottom: 18px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      font-family: inherit;
-    }
-
-    .expiry-row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 10px;
-      background: linear-gradient(135deg, #7c3aed, #2563eb);
-    }
-
-    .btn.secondary {
-      background: linear-gradient(135deg, #f59e0b, #ef4444);
-    }
-
-    #previewUrl {
-      margin-top: 18px;
-      padding: 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      display: none;
-      word-break: break-all;
-      cursor: pointer;
-    }
-
-    #ticketQr {
-      margin-top: 18px;
-      text-align: center;
-    }
-
-    #ticketQr img {
-      max-width: 180px;
-    }
-  </style>
+#previewUrl{
+    margin-top:15px;
+    display:none;
+    padding:12px;
+    border:1px solid #7c3aed;
+    border-radius:12px;
+    word-break:break-all;
+}
+</style>
 </head>
 <body>
 
-  <div class="ticket">
-    <h1>🎫 WIFI TICKET</h1>
-    <div class="subhead">ÉDITION LIMITÉE · EXPIRATION AUTO</div>
+<div class="ticket">
 
-    <div class="input-group">
-      <label>📶 SSID</label>
-      <input type="text" id="ssid" value="MonWiFi">
-    </div>
+    <h1>WIFI TICKET</h1>
 
-    <div class="input-group">
-      <label>🔐 Mot de passe</label>
-      <input type="text" id="password" value="BienvenueChezMoi">
-    </div>
+    <input type="text" id="ssid" value="MonWiFi">
+    <input type="text" id="password" value="BienvenueChezMoi">
 
-    <div class="input-group">
-      <label>⏳ Expire à</label>
-      <div class="expiry-row">
-        <select id="expiryHour"></select>
-        <span>H</span>
-        <select id="expiryMinute">
-          <option value="0">00</option>
-          <option value="15">15</option>
-          <option value="30">30</option>
-          <option value="45">45</option>
-        </select>
-      </div>
-    </div>
+    <select id="expiryHour"></select>
 
-    <button class="btn" id="generateBtn">
-      🎫 GÉNÉRER LE TICKET
-    </button>
+    <select id="expiryMinute">
+        <option value="0">00</option>
+        <option value="15">15</option>
+        <option value="30">30</option>
+        <option value="45">45</option>
+    </select>
 
-    <button class="btn secondary" id="demoBtn">
-      🧪 DÉMO (3 min)
-    </button>
+    <button class="btn" id="generateBtn">🎫 GÉNÉRER</button>
+    <button class="btn secondary" id="demoBtn">🧪 DÉMO</button>
 
     <div id="previewUrl"></div>
-    <div id="ticketQr"></div>
-  </div>
 
-  <script>
-    (() => {
-      const hourSelect = document.getElementById('expiryHour');
-      const preview = document.getElementById('previewUrl');
-      const qrContainer = document.getElementById('ticketQr');
+</div>
 
-      for (let h = 0; h < 24; h++) {
-        const option = document.createElement('option');
-        option.value = h;
-        option.textContent = String(h).padStart(2, '0');
-        hourSelect.appendChild(option);
-      }
+<script>
+(function(){
 
-      hourSelect.value = '23';
+    const hourSelect=document.getElementById('expiryHour');
 
-      function toBase64(buffer) {
+    for(let h=0;h<24;h++){
+        let o=document.createElement('option');
+        o.value=h;
+        o.textContent=h.toString().padStart(2,'0');
+        hourSelect.appendChild(o);
+    }
+
+    hourSelect.value='23';
+
+    async function generateKey(){
+        return await crypto.subtle.generateKey(
+            {name:"AES-GCM",length:256},
+            true,
+            ["encrypt","decrypt"]
+        );
+    }
+
+    async function encryptData(key,text){
+        const iv=crypto.getRandomValues(new Uint8Array(12));
+        const enc=new TextEncoder().encode(text);
+
+        const cipher=await crypto.subtle.encrypt(
+            {name:"AES-GCM",iv},
+            key,
+            enc
+        );
+
+        const combined=new Uint8Array(iv.length+cipher.byteLength);
+
+        combined.set(iv,0);
+        combined.set(new Uint8Array(cipher),iv.length);
+
+        return combined;
+    }
+
+    function toBase64(buffer){
         return btoa(String.fromCharCode(...buffer));
-      }
+    }
 
-      async function generateKey() {
-        return crypto.subtle.generateKey(
-          {
-            name: 'AES-GCM',
-            length: 256
-          },
-          true,
-          ['encrypt', 'decrypt']
-        );
-      }
-
-      async function exportKey(key) {
-        const raw = await crypto.subtle.exportKey('raw', key);
+    async function exportKey(key){
+        const raw=await crypto.subtle.exportKey("raw",key);
         return toBase64(new Uint8Array(raw));
-      }
+    }
 
-      async function encryptData(key, text) {
-        const iv = crypto.getRandomValues(new Uint8Array(12));
-        const encoded = new TextEncoder().encode(text);
-
-        const encrypted = await crypto.subtle.encrypt(
-          {
-            name: 'AES-GCM',
-            iv
-          },
-          key,
-          encoded
-        );
-
-        const result = new Uint8Array(iv.length + encrypted.byteLength);
-        result.set(iv, 0);
-        result.set(new Uint8Array(encrypted), iv.length);
-
-        return result;
-      }
-
-      function getExpiry(hour, minute) {
-        const d = new Date();
-        d.setHours(hour, minute, 0, 0);
+    function getExpiryTimestamp(h,m){
+        const d=new Date();
+        d.setHours(h,m,0,0);
         return d.getTime();
-      }
+    }
 
-      function generateLinkQR(link) {
-        const qr = qrcode(0, 'M');
-        qr.addData(link);
-        qr.make();
+    function getDemoExpiry(){
+        return Date.now()+3*60*1000;
+    }
 
-        qrContainer.innerHTML = qr.createImgTag(5);
-      }
+    async function createEncryptedLink(ssid,pwd,expiry){
 
-      async function createTicketLink(ssid, pwd, expiry) {
-        const payload = JSON.stringify({
-          ssid,
-          pwd,
-          exp: expiry
+        const payload=JSON.stringify({
+            ssid,
+            pwd,
+            exp:expiry
         });
 
-        const key = await generateKey();
-        const encrypted = await encryptData(key, payload);
+        const key=await generateKey();
+        const encrypted=await encryptData(key,payload);
 
-        const key64 = await exportKey(key);
-        const data64 = toBase64(encrypted);
+        const encB64=toBase64(encrypted);
+        const keyB64=await exportKey(key);
 
-        const base = window.location.href.replace(/index\.html$/, '');
+        const base=window.location.href
+            .replace(/index\.html$/,'')
+            .replace(/\/$/,'');
 
-        return `${base}connect.html#${key64}:${data64}`;
-      }
+        return base+'/connect.html#'+keyB64+':'+encB64;
+    }
 
-      async function generateTicket(demo = false) {
-        const ssid = document.getElementById('ssid').value.trim();
-        const pwd = document.getElementById('password').value.trim();
+    async function generateAndShow(demo){
 
-        if (!ssid || !pwd) {
-          alert('Veuillez remplir tous les champs');
-          return;
+        const ssid=document.getElementById('ssid').value.trim();
+        const pwd=document.getElementById('password').value.trim();
+
+        if(!ssid||!pwd){
+            alert('Remplissez SSID et mot de passe');
+            return;
         }
 
-        const expiry = demo
-          ? Date.now() + 3 * 60 * 1000
-          : getExpiry(
-              parseInt(hourSelect.value),
-              parseInt(document.getElementById('expiryMinute').value)
+        const exp=demo
+            ? getDemoExpiry()
+            : getExpiryTimestamp(
+                parseInt(hourSelect.value),
+                parseInt(document.getElementById('expiryMinute').value)
             );
 
-        const link = await createTicketLink(ssid, pwd, expiry);
+        try{
+            const link=await createEncryptedLink(ssid,pwd,exp);
 
-        preview.style.display = 'block';
-        preview.innerHTML = link;
+            const prev=document.getElementById('previewUrl');
 
-        generateLinkQR(link);
+            prev.style.display='block';
+            prev.innerHTML=link;
 
-        preview.onclick = () => {
-          navigator.clipboard.writeText(link)
-            .then(() => alert('Lien copié !'));
-        };
-      }
+            prev.onclick=()=>{
+                navigator.clipboard.writeText(link)
+                    .then(()=>alert('Copié !'));
+            };
 
-      document.getElementById('generateBtn')
-        .addEventListener('click', () => generateTicket(false));
+        }catch(e){
+            alert('Erreur: '+e);
+        }
+    }
 
-      document.getElementById('demoBtn')
-        .addEventListener('click', () => generateTicket(true));
-    })();
-  </script>
+    document.getElementById('generateBtn')
+        .addEventListener('click',()=>generateAndShow(false));
+
+    document.getElementById('demoBtn')
+        .addEventListener('click',()=>generateAndShow(true));
+
+})();
+</script>
 
 </body>
 </html>
