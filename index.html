@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wi-Fi Ticket</title>
+<title>ABtime • Wi-Fi Ticket</title>
 
 <style>
 *{
@@ -24,18 +24,49 @@ body{
 
 .ticket{
     width:100%;
-    max-width:540px;
+    max-width:560px;
     background:white;
     border-radius:22px;
     padding:30px;
     box-shadow:0 20px 60px rgba(0,0,0,0.25);
 }
 
+/* ===== BRAND ===== */
+.brand-header{
+    text-align:center;
+    margin-bottom:24px;
+}
+
+.brand-logo{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin-bottom:10px;
+}
+
+.brand-name{
+    font-size:1.6rem;
+    font-weight:800;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    background:linear-gradient(135deg,#7c3aed,#2563eb);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.brand-tagline{
+    font-size:0.78rem;
+    color:#64748b;
+    margin-top:6px;
+    text-transform:uppercase;
+    letter-spacing:0.8px;
+}
+
 h1{
     text-align:center;
     margin-bottom:25px;
     color:#4c1d95;
-    font-size:2rem;
+    font-size:1.8rem;
 }
 
 .input-group{
@@ -171,7 +202,6 @@ select:focus{
     font-weight:bold;
     background:linear-gradient(135deg,#ffdd00,#facc15);
     color:#000;
-    box-shadow:0 8px 18px rgba(0,0,0,0.15);
 }
 
 .support-note{
@@ -185,16 +215,39 @@ select:focus{
 
 <div class="ticket">
 
+    <div class="brand-header">
+        <div class="brand-logo">
+            <svg viewBox="0 0 100 100" width="72" height="72">
+                <defs>
+                    <linearGradient id="abGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#7c3aed"/>
+                        <stop offset="100%" stop-color="#2563eb"/>
+                    </linearGradient>
+                </defs>
+                <circle cx="50" cy="50" r="44" fill="url(#abGradient)"/>
+                <path d="M28 62 L40 35 L50 55 L60 28 L72 62"
+                    fill="none"
+                    stroke="white"
+                    stroke-width="6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"/>
+                <circle cx="50" cy="50" r="6" fill="white"/>
+            </svg>
+        </div>
+
+        <div class="brand-name">ABtime</div>
+        <div class="brand-tagline">Software • Secure Wi-Fi Ticket</div>
+    </div>
+
     <h1>🎫 WIFI TICKET</h1>
 
     <div class="input-group">
-        <label>📶 Nom du réseau Wi-Fi</label>
+        <label>📶 Nom du réseau</label>
         <input type="text" id="ssid" value="MonWiFi">
     </div>
 
     <div class="input-group">
         <label>🔐 Mot de passe</label>
-
         <div class="input-box">
             <input type="password" id="password" value="BienvenueChezMoi">
             <button class="password-toggle" id="togglePassword">👁</button>
@@ -203,7 +256,6 @@ select:focus{
 
     <div class="input-group">
         <label>⏳ Heure d’expiration</label>
-
         <div class="expiry-wrapper">
             <div class="expiry-row">
                 <select id="expiryHour"></select>
@@ -215,32 +267,22 @@ select:focus{
                     <option value="45">45</option>
                 </select>
             </div>
-
-            <div class="time-hint">
-                Le ticket expirera automatiquement
-            </div>
+            <div class="time-hint">Expiration automatique</div>
         </div>
     </div>
 
-    <button class="btn primary" id="generateBtn">
-        🎫 GÉNÉRER
-    </button>
-
-    <button class="btn secondary" id="demoBtn">
-        🧪 DÉMO 3 MIN
-    </button>
+    <button class="btn primary" id="generateBtn">🎫 GÉNÉRER</button>
+    <button class="btn secondary" id="demoBtn">🧪 DÉMO 3 MIN</button>
 
     <div id="previewUrl"></div>
 
     <div class="support-box">
         <div class="support-title">❤️ Vous aimez cet outil ?</div>
-
-        <a href="https://ko-fi.com/sellerfit" target="_blank" class="support-btn">
+        <a href="https://ko-fi.com/VOTRE_PSEUDO_ICI" target="_blank" class="support-btn">
             ☕ Offrir un café
         </a>
-
         <div class="support-note">
-            Soutenez le développement • 100% gratuit pour toujours
+            Soutenez le développement • 100% gratuit
         </div>
     </div>
 
@@ -249,112 +291,98 @@ select:focus{
 <script>
 (function(){
 
-    const hourSelect=document.getElementById('expiryHour');
+const hourSelect=document.getElementById('expiryHour');
 
-    for(let h=0;h<24;h++){
-        let option=document.createElement('option');
-        option.value=h;
-        option.textContent=h.toString().padStart(2,'0');
-        hourSelect.appendChild(option);
-    }
+for(let h=0;h<24;h++){
+    let option=document.createElement('option');
+    option.value=h;
+    option.textContent=h.toString().padStart(2,'0');
+    hourSelect.appendChild(option);
+}
+hourSelect.value='23';
 
-    hourSelect.value='23';
+document.getElementById('togglePassword').onclick=function(){
+    const pwd=document.getElementById('password');
+    pwd.type=pwd.type==='password'?'text':'password';
+};
 
-    document.getElementById('togglePassword').onclick=function(){
-        const pwd=document.getElementById('password');
-        pwd.type=pwd.type==='password' ? 'text' : 'password';
-    };
+async function generateKey(){
+    return await crypto.subtle.generateKey(
+        {name:"AES-GCM",length:256},
+        true,
+        ["encrypt","decrypt"]
+    );
+}
 
-    async function generateKey(){
-        return await crypto.subtle.generateKey(
-            {name:"AES-GCM",length:256},
-            true,
-            ["encrypt","decrypt"]
+async function encryptData(key,text){
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const encoded=new TextEncoder().encode(text);
+
+    const encrypted=await crypto.subtle.encrypt(
+        {name:"AES-GCM",iv},
+        key,
+        encoded
+    );
+
+    const combined=new Uint8Array(iv.length+encrypted.byteLength);
+    combined.set(iv,0);
+    combined.set(new Uint8Array(encrypted),iv.length);
+
+    return combined;
+}
+
+function toBase64(buffer){
+    return btoa(String.fromCharCode(...buffer));
+}
+
+async function exportKey(key){
+    const raw=await crypto.subtle.exportKey("raw",key);
+    return toBase64(new Uint8Array(raw));
+}
+
+async function createLink(ssid,pwd,exp){
+    const payload=JSON.stringify({ssid,pwd,exp});
+    const key=await generateKey();
+    const encrypted=await encryptData(key,payload);
+
+    const key64=await exportKey(key);
+    const data64=toBase64(encrypted);
+
+    const base=window.location.href.replace(/index\.html$/,'').replace(/\/$/,'');
+
+    return base+'/connect.html#'+key64+':'+data64;
+}
+
+function getDemoExpiry(){
+    return Date.now()+180000;
+}
+
+function getExpiryTimestamp(h,m){
+    const d=new Date();
+    d.setHours(h,m,0,0);
+    return d.getTime();
+}
+
+async function generate(demo){
+    const ssid=document.getElementById('ssid').value.trim();
+    const pwd=document.getElementById('password').value.trim();
+
+    const exp=demo
+        ? getDemoExpiry()
+        : getExpiryTimestamp(
+            parseInt(hourSelect.value),
+            parseInt(document.getElementById('expiryMinute').value)
         );
-    }
 
-    async function encryptData(key,text){
-        const iv=crypto.getRandomValues(new Uint8Array(12));
-        const encoded=new TextEncoder().encode(text);
+    const link=await createLink(ssid,pwd,exp);
 
-        const encrypted=await crypto.subtle.encrypt(
-            {name:"AES-GCM",iv},
-            key,
-            encoded
-        );
+    const preview=document.getElementById('previewUrl');
+    preview.style.display='block';
+    preview.innerHTML='🔗 '+link;
+}
 
-        const combined=new Uint8Array(iv.length+encrypted.byteLength);
-        combined.set(iv,0);
-        combined.set(new Uint8Array(encrypted),iv.length);
-
-        return combined;
-    }
-
-    function toBase64(buffer){
-        return btoa(String.fromCharCode(...buffer));
-    }
-
-    async function exportKey(key){
-        const raw=await crypto.subtle.exportKey("raw",key);
-        return toBase64(new Uint8Array(raw));
-    }
-
-    function getExpiryTimestamp(h,m){
-        const d=new Date();
-        d.setHours(h,m,0,0);
-        return d.getTime();
-    }
-
-    function getDemoExpiry(){
-        return Date.now()+180000;
-    }
-
-    async function createLink(ssid,pwd,exp){
-        const payload=JSON.stringify({ssid,pwd,exp});
-
-        const key=await generateKey();
-        const encrypted=await encryptData(key,payload);
-
-        const key64=await exportKey(key);
-        const data64=toBase64(encrypted);
-
-        const base=window.location.href
-            .replace(/index\.html$/,'')
-            .replace(/\/$/,'');
-
-        return base+'/connect.html#'+key64+':'+data64;
-    }
-
-    async function generate(demo){
-        const ssid=document.getElementById('ssid').value.trim();
-        const pwd=document.getElementById('password').value.trim();
-
-        if(!ssid||!pwd){
-            alert('Veuillez remplir les champs');
-            return;
-        }
-
-        const exp=demo
-            ? getDemoExpiry()
-            : getExpiryTimestamp(
-                parseInt(hourSelect.value),
-                parseInt(document.getElementById('expiryMinute').value)
-            );
-
-        const link=await createLink(ssid,pwd,exp);
-
-        const preview=document.getElementById('previewUrl');
-        preview.style.display='block';
-        preview.innerHTML='🔗 '+link;
-
-        preview.onclick=()=>{
-            navigator.clipboard.writeText(link)
-                .then(()=>alert('Lien copié'));
-        };
-    }
-
-    document.getElementById('generateBtn').onclick=()=>generate(false);
-    document.getElementById('demoBtn').onclick=()=>generate(true);
+document.getElementById('generateBtn').onclick=()=>generate(false);
+document.getElementById('demoBtn').onclick=()=>generate(true);
 
 })();
 </script>
