@@ -1,11 +1,5 @@
 <!DOCTYPE html>
 
-      async function decryptData(key, data64) {
-        const buffer = fromBase64(data64);
-        const bytes = new Uint8Array(buffer);
-        const iv = bytes.slice(0, 12);
-        const cipher = bytes.slice(12);
-
         const decrypted = await crypto.subtle.decrypt(
           { name: 'AES-GCM', iv },
           key,
