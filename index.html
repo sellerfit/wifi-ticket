@@ -3,123 +3,323 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ABtime • Connexion</title>
-<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<title>ABtime • Wi-Fi Ticket</title>
+
 <style>
+*{box-sizing:border-box;margin:0;padding:0}
+
 body{
     min-height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
-    background:#1e293b;
-    font-family:Arial,sans-serif;
+    background:linear-gradient(135deg,#0f172a,#7c3aed);
+    font-family:Arial, sans-serif;
     padding:20px;
 }
-.card{
-    background:white;
-    max-width:500px;
+
+.ticket{
     width:100%;
+    max-width:560px;
+    background:white;
+    border-radius:22px;
     padding:30px;
-    border-radius:20px;
-    text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,0.25);
 }
-.logo{
-    margin-bottom:20px;
+
+/* ===== BRAND ===== */
+.brand-header{
+    text-align:center;
+    margin-bottom:24px;
+}
+
+.brand-logo{
+    display:flex;
+    justify-content:center;
+    margin-bottom:12px;
+}
+
+.brand-name{
+    font-size:1.8rem;
+    font-weight:800;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:#7c3aed; /* fallback */
+    background:linear-gradient(135deg,#7c3aed,#2563eb);
+    background-clip:text;
+    -webkit-background-clip:text;
+    color:transparent;
+    -webkit-text-fill-color:transparent;
+}
+
+.brand-tagline{
+    font-size:0.78rem;
+    color:#64748b;
+    margin-top:6px;
+    text-transform:uppercase;
+    letter-spacing:0.8px;
+}
+
+h1{
+    text-align:center;
+    margin-bottom:25px;
+    color:#4c1d95;
+    font-size:1.8rem;
+}
+
+.input-group{margin-bottom:22px}
+
+label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:bold;
+    color:#334155;
+}
+
+.input-box{position:relative}
+
+input,select{
+    width:100%;
+    padding:16px;
+    border:2px solid #cbd5e1;
+    border-radius:14px;
+    font-size:1rem;
+    background:#f8fafc;
+}
+
+.password-toggle{
+    position:absolute;
+    right:12px;
+    top:50%;
+    transform:translateY(-50%);
+    background:none;
+    border:none;
+    cursor:pointer;
+}
+
+.expiry-wrapper{
+    background:#f8fafc;
+    border:2px solid #cbd5e1;
+    border-radius:14px;
+    padding:12px;
+}
+
+.expiry-row{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:center;
+}
+
+.expiry-row select{
+    width:120px;
+}
+
+.btn{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:14px;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    margin-top:12px;
+    font-size:1rem;
+}
+
+.primary{background:linear-gradient(135deg,#7c3aed,#2563eb)}
+.secondary{background:linear-gradient(135deg,#f59e0b,#ef4444)}
+
+#previewUrl{
+    margin-top:20px;
+    display:none;
+    background:#f8fafc;
+    border:2px solid #7c3aed;
+    padding:14px;
+    border-radius:14px;
+    word-break:break-all;
+    cursor:pointer;
+}
+
+.support-box{
+    margin-top:28px;
+    padding-top:18px;
+    border-top:1px dashed #cbd5e1;
+    text-align:center;
 }
 </style>
 </head>
 <body>
-<div class="card">
 
-    <div class="logo">
-        <svg viewBox="0 0 100 100" width="72" height="72">
-            <defs>
-                <linearGradient id="abGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#7c3aed"/>
-                    <stop offset="100%" stop-color="#2563eb"/>
-                </linearGradient>
-            </defs>
-            <circle cx="50" cy="50" r="44" fill="url(#abGradient2)"/>
-            <path d="M28 62 L40 35 L50 55 L60 28 L72 62"
-                fill="none"
-                stroke="white"
-                stroke-width="6"/>
-        </svg>
-        <h1 style="color:#7c3aed;">ABtime</h1>
+<div class="ticket">
+
+    <div class="brand-header">
+        <div class="brand-logo">
+            <svg viewBox="0 0 100 100" width="72" height="72">
+                <defs>
+                    <linearGradient id="abGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#7c3aed"/>
+                        <stop offset="100%" stop-color="#2563eb"/>
+                    </linearGradient>
+                </defs>
+                <circle cx="50" cy="50" r="44" fill="url(#abGradient)"/>
+                <path d="M28 62 L40 35 L50 55 L60 28 L72 62"
+                    fill="none"
+                    stroke="white"
+                    stroke-width="6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"/>
+                <circle cx="50" cy="50" r="6" fill="white"/>
+            </svg>
+        </div>
+
+        <div class="brand-name">ABtime</div>
+        <div class="brand-tagline">Software • Secure Wi-Fi Ticket</div>
     </div>
 
-    <div id="dynamicContent">Chargement...</div>
+    <h1>🎫 WIFI TICKET</h1>
+
+    <div class="input-group">
+        <label>📶 Nom du réseau</label>
+        <input type="text" id="ssid" value="MonWiFi">
+    </div>
+
+    <div class="input-group">
+        <label>🔐 Mot de passe</label>
+        <div class="input-box">
+            <input type="password" id="password" value="BienvenueChezMoi">
+            <button class="password-toggle" id="togglePassword">👁</button>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>⏳ Heure d’expiration</label>
+        <div class="expiry-wrapper">
+            <div class="expiry-row">
+                <select id="expiryHour"></select>
+                <span>:</span>
+                <select id="expiryMinute">
+                    <option value="0">00</option>
+                    <option value="15">15</option>
+                    <option value="30">30</option>
+                    <option value="45">45</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn primary" id="generateBtn">🎫 GÉNÉRER</button>
+    <button class="btn secondary" id="demoBtn">🧪 DÉMO 3 MIN</button>
+
+    <div id="previewUrl"></div>
+
 </div>
 
 <script>
 (function(){
 
-function base64ToArrayBuffer(base64){
-    const binary=atob(base64);
-    const bytes=new Uint8Array(binary.length);
-    for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
-    return bytes.buffer;
-}
+const hourSelect=document.getElementById('expiryHour');
 
-async function importKey(key64){
-    return await crypto.subtle.importKey(
-        "raw",
-        base64ToArrayBuffer(key64),
-        {name:"AES-GCM"},
-        false,
-        ["decrypt"]
+for(let h=0;h<24;h++){
+    let option=document.createElement('option');
+    option.value=h;
+    option.textContent=h.toString().padStart(2,'0');
+    hourSelect.appendChild(option);
+}
+hourSelect.value='23';
+
+document.getElementById('togglePassword').onclick=function(){
+    const pwd=document.getElementById('password');
+    pwd.type=pwd.type==='password'?'text':'password';
+};
+
+async function generateKey(){
+    return await crypto.subtle.generateKey(
+        {name:"AES-GCM",length:256},
+        true,
+        ["encrypt","decrypt"]
     );
 }
 
-async function decryptData(key,data64){
-    const combined=base64ToArrayBuffer(data64);
-    const arr=new Uint8Array(combined);
+async function encryptData(key,text){
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const encoded=new TextEncoder().encode(text);
 
-    const iv=arr.slice(0,12);
-    const cipher=arr.slice(12);
-
-    const decrypted=await crypto.subtle.decrypt(
+    const encrypted=await crypto.subtle.encrypt(
         {name:"AES-GCM",iv},
         key,
-        cipher
+        encoded
     );
 
-    return new TextDecoder().decode(decrypted);
+    const combined=new Uint8Array(iv.length+encrypted.byteLength);
+    combined.set(iv,0);
+    combined.set(new Uint8Array(encrypted),iv.length);
+
+    return combined;
 }
 
-function generateWifiQR(ssid,pwd){
-    const qr=qrcode(0,'M');
-    qr.addData(`WIFI:T:WPA;S:${ssid};P:${pwd};;`);
-    qr.make();
-    return qr.createImgTag(6);
+function toBase64(buffer){
+    return btoa(String.fromCharCode(...buffer));
 }
 
-async function processTicket(){
-    const hash=window.location.hash.substring(1);
-    const separator=hash.indexOf(':');
+async function exportKey(key){
+    const raw=await crypto.subtle.exportKey("raw",key);
+    return toBase64(new Uint8Array(raw));
+}
 
-    const keyPart=hash.substring(0,separator);
-    const dataPart=hash.substring(separator+1);
+async function createLink(ssid,pwd,exp){
+    const payload=JSON.stringify({ssid,pwd,exp});
+    const key=await generateKey();
+    const encrypted=await encryptData(key,payload);
 
-    try{
-        const key=await importKey(keyPart);
-        const decrypted=await decryptData(key,dataPart);
-        const data=JSON.parse(decrypted);
+    const key64=await exportKey(key);
+    const data64=toBase64(encrypted);
 
-        document.getElementById('dynamicContent').innerHTML=`
-            <h2>✅ VALIDE</h2>
-            <div>${generateWifiQR(data.ssid,data.pwd)}</div>
-            <p>📶 ${data.ssid}</p>
-            <p>🔐 ${data.pwd}</p>
-        `;
-    }catch{
-        document.getElementById('dynamicContent').innerHTML='Ticket invalide';
+    const base=window.location.href.replace(/index\.html$/,'').replace(/\/$/,'');
+
+    return base+'/connect.html#'+key64+':'+data64;
+}
+
+function copyText(text){
+    if(navigator.clipboard){
+        navigator.clipboard.writeText(text)
+            .then(()=>alert('Lien copié'))
+            .catch(()=>fallbackCopy(text));
+    }else{
+        fallbackCopy(text);
     }
 }
 
-window.addEventListener('DOMContentLoaded',processTicket);
+function fallbackCopy(text){
+    const temp=document.createElement('textarea');
+    temp.value=text;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand('copy');
+    document.body.removeChild(temp);
+    alert('Lien copié');
+}
+
+async function generate(demo){
+    const ssid=document.getElementById('ssid').value.trim();
+    const pwd=document.getElementById('password').value.trim();
+
+    const exp=Date.now()+180000;
+
+    const link=await createLink(ssid,pwd,exp);
+
+    const preview=document.getElementById('previewUrl');
+    preview.style.display='block';
+    preview.innerHTML='🔗 CLIQUEZ POUR COPIER<br><br>'+link;
+
+    preview.onclick=()=>copyText(link);
+}
+
+document.getElementById('generateBtn').onclick=()=>generate(false);
+document.getElementById('demoBtn').onclick=()=>generate(true);
 
 })();
 </script>
+
 </body>
 </html>
