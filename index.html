@@ -6,7 +6,11 @@
 <title>ABtime • Wi-Fi Ticket</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
 
 body{
     min-height:100vh;
@@ -14,7 +18,7 @@ body{
     justify-content:center;
     align-items:center;
     background:linear-gradient(135deg,#0f172a,#7c3aed);
-    font-family:Arial, sans-serif;
+    font-family:'Courier New', monospace;
     padding:20px;
 }
 
@@ -32,9 +36,17 @@ body{
     margin-bottom:24px;
 }
 
+.brand-logo{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin-bottom:10px;
+}
+
 .brand-name{
-    font-size:1.8rem;
+    font-size:1.6rem;
     font-weight:800;
+    letter-spacing:1px;
     text-transform:uppercase;
     background:linear-gradient(135deg,#7c3aed,#2563eb);
     -webkit-background-clip:text;
@@ -45,23 +57,35 @@ body{
     font-size:0.78rem;
     color:#64748b;
     margin-top:6px;
+    text-transform:uppercase;
+    letter-spacing:0.8px;
 }
 
 h1{
     text-align:center;
     margin-bottom:25px;
     color:#4c1d95;
+    font-size:1.8rem;
 }
 
-.input-group{margin-bottom:22px}
+.input-group{
+    margin-bottom:22px;
+}
 
 label{
     display:block;
     margin-bottom:8px;
     font-weight:bold;
+    color:#334155;
+    font-size:0.95rem;
 }
 
-input,select{
+.input-box{
+    position:relative;
+}
+
+input,
+select{
     width:100%;
     padding:16px;
     border:2px solid #cbd5e1;
@@ -70,10 +94,56 @@ input,select{
     background:#f8fafc;
 }
 
+input:focus,
+select:focus{
+    outline:none;
+    border-color:#7c3aed;
+    box-shadow:0 0 0 4px rgba(124,58,237,0.15);
+}
+
+.password-toggle{
+    position:absolute;
+    right:12px;
+    top:50%;
+    transform:translateY(-50%);
+    background:none;
+    border:none;
+    cursor:pointer;
+    font-size:1rem;
+}
+
+.expiry-wrapper{
+    background:#f8fafc;
+    border:2px solid #cbd5e1;
+    border-radius:14px;
+    padding:12px;
+}
+
 .expiry-row{
     display:flex;
-    gap:12px;
     align-items:center;
+    justify-content:center;
+    gap:12px;
+}
+
+.expiry-row select{
+    width:120px;
+    text-align:center;
+    font-size:1.1rem;
+    background:white;
+}
+
+.time-separator{
+    font-size:1.6rem;
+    font-weight:bold;
+    color:#475569;
+}
+
+.time-hint{
+    text-align:center;
+    margin-top:10px;
+    font-size:0.8rem;
+    color:#64748b;
 }
 
 .btn{
@@ -88,8 +158,13 @@ input,select{
     font-size:1rem;
 }
 
-.primary{background:linear-gradient(135deg,#7c3aed,#2563eb)}
-.secondary{background:linear-gradient(135deg,#f59e0b,#ef4444)}
+.primary{
+    background:linear-gradient(135deg,#7c3aed,#2563eb);
+}
+
+.secondary{
+    background:linear-gradient(135deg,#f59e0b,#ef4444);
+}
 
 #previewUrl{
     margin-top:20px;
@@ -102,65 +177,35 @@ input,select{
     cursor:pointer;
 }
 
-/* KO-FI */
-.kofi-box{
+.support-box{
     margin-top:28px;
     padding-top:18px;
     border-top:1px dashed #cbd5e1;
     text-align:center;
 }
 
-.kofi-btn{
-    display:inline-block;
-    margin-top:10px;
-    background:#ffdd00;
-    color:black;
-    padding:12px 22px;
-    text-decoration:none;
-    border-radius:30px;
+.support-title{
+    font-size:0.85rem;
+    color:#475569;
+    text-transform:uppercase;
+    margin-bottom:12px;
     font-weight:bold;
-    box-shadow:0 4px 12px rgba(0,0,0,0.15);
-}
-<style id="kofi-float-style">
-.kofi-float{
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 9999;
-
-    background: #ffdd00;
-    color: #000000;
-    text-decoration: none;
-
-    padding: 12px 18px;
-    border-radius: 999px;
-
-    font-family: Arial, sans-serif;
-    font-size: 0.95rem;
-    font-weight: bold;
-
-    box-shadow: 0 8px 22px rgba(0,0,0,0.25);
-    border: 2px solid rgba(0,0,0,0.08);
-
-    transition: all 0.25s ease;
 }
 
-.kofi-float:hover{
-    transform: translateY(-3px) scale(1.03);
-    box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+.support-btn{
+    display:inline-block;
+    padding:12px 24px;
+    border-radius:14px;
+    text-decoration:none;
+    font-weight:bold;
+    background:linear-gradient(135deg,#ffdd00,#facc15);
+    color:#000;
 }
 
-.kofi-float:active{
-    transform: scale(0.98);
-}
-
-@media (max-width: 600px){
-    .kofi-float{
-        bottom: 14px;
-        right: 14px;
-        padding: 10px 14px;
-        font-size: 0.85rem;
-    }
+.support-note{
+    margin-top:10px;
+    font-size:0.72rem;
+    color:#64748b;
 }
 </style>
 </head>
@@ -169,6 +214,25 @@ input,select{
 <div class="ticket">
 
     <div class="brand-header">
+        <div class="brand-logo">
+            <svg viewBox="0 0 100 100" width="72" height="72">
+                <defs>
+                    <linearGradient id="abGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#7c3aed"/>
+                        <stop offset="100%" stop-color="#2563eb"/>
+                    </linearGradient>
+                </defs>
+                <circle cx="50" cy="50" r="44" fill="url(#abGradient)"/>
+                <path d="M28 62 L40 35 L50 55 L60 28 L72 62"
+                    fill="none"
+                    stroke="white"
+                    stroke-width="6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"/>
+                <circle cx="50" cy="50" r="6" fill="white"/>
+            </svg>
+        </div>
+
         <div class="brand-name">ABtime</div>
         <div class="brand-tagline">Software • Secure Wi-Fi Ticket</div>
     </div>
@@ -182,19 +246,26 @@ input,select{
 
     <div class="input-group">
         <label>🔐 Mot de passe</label>
-        <input type="text" id="password" value="BienvenueChezMoi">
+        <div class="input-box">
+            <input type="password" id="password" value="BienvenueChezMoi">
+            <button class="password-toggle" id="togglePassword">👁</button>
+        </div>
     </div>
 
     <div class="input-group">
         <label>⏳ Heure d’expiration</label>
-        <div class="expiry-row">
-            <select id="expiryHour"></select>
-            <select id="expiryMinute">
-                <option value="0">00</option>
-                <option value="15">15</option>
-                <option value="30">30</option>
-                <option value="45">45</option>
-            </select>
+        <div class="expiry-wrapper">
+            <div class="expiry-row">
+                <select id="expiryHour"></select>
+                <span class="time-separator">:</span>
+                <select id="expiryMinute">
+                    <option value="0">00</option>
+                    <option value="15">15</option>
+                    <option value="30">30</option>
+                    <option value="45">45</option>
+                </select>
+            </div>
+            <div class="time-hint">Expiration automatique</div>
         </div>
     </div>
 
@@ -203,15 +274,13 @@ input,select{
 
     <div id="previewUrl"></div>
 
-    <div class="kofi-box">
-        <div style="font-size:0.8rem;color:#64748b;">
-            ❤️ Vous aimez cet outil ?
-        </div>
-        <a href="https://ko-fi.com/VOTRE_PSEUDO_ICI" target="_blank" class="kofi-btn">
+    <div class="support-box">
+        <div class="support-title">❤️ Vous aimez cet outil ?</div>
+        <a href="https://sellerfit.github.io/wifi-ticket/" target="_blank" class="support-btn">
             ☕ Offrir un café
         </a>
-        <div style="font-size:0.65rem;margin-top:8px;color:#94a3b8;">
-            Soutenez le développement • Gratuit pour toujours
+        <div class="support-note">
+            Soutenez le développement • 100% gratuit
         </div>
     </div>
 
@@ -219,6 +288,7 @@ input,select{
 
 <script>
 (function(){
+
 const hourSelect=document.getElementById('expiryHour');
 
 for(let h=0;h<24;h++){
@@ -228,6 +298,11 @@ for(let h=0;h<24;h++){
     hourSelect.appendChild(option);
 }
 hourSelect.value='23';
+
+document.getElementById('togglePassword').onclick=function(){
+    const pwd=document.getElementById('password');
+    pwd.type=pwd.type==='password'?'text':'password';
+};
 
 async function generateKey(){
     return await crypto.subtle.generateKey(
@@ -276,33 +351,39 @@ async function createLink(ssid,pwd,exp){
     return base+'/connect.html#'+key64+':'+data64;
 }
 
-function copyText(text){
-    navigator.clipboard.writeText(text)
-        .then(()=>alert('Lien copié'))
-        .catch(()=>alert(text));
+function getDemoExpiry(){
+    return Date.now()+180000;
 }
 
-async function generate(){
+function getExpiryTimestamp(h,m){
+    const d=new Date();
+    d.setHours(h,m,0,0);
+    return d.getTime();
+}
+
+async function generate(demo){
     const ssid=document.getElementById('ssid').value.trim();
     const pwd=document.getElementById('password').value.trim();
 
-    const exp=Date.now()+180000;
+    const exp=demo
+        ? getDemoExpiry()
+        : getExpiryTimestamp(
+            parseInt(hourSelect.value),
+            parseInt(document.getElementById('expiryMinute').value)
+        );
 
     const link=await createLink(ssid,pwd,exp);
 
     const preview=document.getElementById('previewUrl');
     preview.style.display='block';
-    preview.innerHTML='🔗 CLIQUEZ POUR COPIER<br><br>'+link;
-    preview.onclick=()=>copyText(link);
+    preview.innerHTML='🔗 '+link;
 }
 
-document.getElementById('generateBtn').onclick=generate;
-document.getElementById('demoBtn').onclick=generate;
+document.getElementById('generateBtn').onclick=()=>generate(false);
+document.getElementById('demoBtn').onclick=()=>generate(true);
 
 })();
 </script>
-<a href="https://ko-fi.com/VOTRE_PSEUDO_ICI" target="_blank" class="kofi-float">
-    ☕ Soutenir
-</a>
+
 </body>
 </html>
