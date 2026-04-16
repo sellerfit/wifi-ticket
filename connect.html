@@ -1,177 +1,63 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Connexion Wi-Fi · Ticket Valide</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion Wi-Fi</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 
-    <style>
-        *{
-            box-sizing:border-box;
-            margin:0;
-            padding:0
-        }
+<style>
+body{
+    background:#2b2b2b;
+    font-family:'Courier New', monospace;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:16px;
+}
 
-        body{
-            background:#2b2b2b;
-            min-height:100vh;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-family:'Courier New',Courier,monospace;
-            padding:16px
-        }
+.ticket-receipt{
+    max-width:500px;
+    width:100%;
+    background:#f9f6f0;
+    padding:25px;
+    border-radius:12px;
+    text-align:center;
+}
 
-        .ticket-receipt{
-            max-width:500px;
-            width:100%;
-            background:#f9f6f0;
-            padding:25px 20px 30px;
-            border-radius:8px;
-            box-shadow:0 12px 28px rgba(0,0,0,0.4);
-            border:1px solid #d9cdb3;
-            position:relative;
-            text-align:center
-        }
+#qrcode{
+    margin:20px 0;
+}
 
-        .ticket-receipt::before,
-        .ticket-receipt::after{
-            content:"";
-            position:absolute;
-            left:15px;
-            right:15px;
-            height:4px;
-            background:repeating-linear-gradient(
-                90deg,
-                #b9aa8f,
-                #b9aa8f 6px,
-                transparent 6px,
-                transparent 12px
-            )
-        }
+.ssid-display{
+    font-size:1.4rem;
+    font-weight:bold;
+    margin:10px 0;
+}
 
-        .ticket-receipt::before{top:12px}
-        .ticket-receipt::after{bottom:12px}
+.pwd-row{
+    margin:15px 0;
+}
 
-        h2{
-            font-size:2rem;
-            text-transform:uppercase;
-            border-bottom:2px dashed #aa9f8a;
-            padding-bottom:8px;
-            margin-bottom:20px;
-            color:#1f1e1b
-        }
+.copy-btn{
+    margin-top:10px;
+    padding:8px 16px;
+    cursor:pointer;
+}
 
-        .status-badge{
-            display:inline-block;
-            background:#2c5e2e;
-            color:#f0eadb;
-            padding:6px 16px;
-            font-weight:bold;
-            text-transform:uppercase;
-            margin-bottom:20px
-        }
-
-        .expired-badge{
-            background:#8b2a2a
-        }
-
-        #qrcode{
-            display:flex;
-            justify-content:center;
-            margin:20px 0;
-            background:white;
-            padding:20px;
-            border:3px solid #7f7462
-        }
-
-        #qrcode img,
-        #qrcode canvas{
-            width:220px;
-            height:220px
-        }
-
-        .ssid-display{
-            font-size:1.6rem;
-            font-weight:bold;
-            background:#e9e0d2;
-            padding:10px;
-            margin:10px 0;
-            border:1px dashed #5e5446
-        }
-
-        .pwd-row{
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            gap:10px;
-            margin:15px 0;
-            background:#ddd2c2;
-            padding:10px
-        }
-
-        .copy-btn{
-            background:#5f5544;
-            color:#f0eadb;
-            padding:8px 16px;
-            font-family:monospace;
-            font-weight:bold;
-            cursor:pointer;
-            border:none
-        }
-
-        .expiry-info{
-            margin-top:20px;
-            border-top:1px dashed #a99c89;
-            padding-top:15px
-        }
-
-        .error-msg{
-            color:#a13026;
-            font-weight:bold;
-            padding:30px 10px
-        }
-
-        .btn-link{
-            display:inline-block;
-            background:#ffdd00;
-            color:#000000;
-            padding:10px 20px;
-            text-decoration:none;
-            font-family:'Courier New', Courier, monospace;
-            font-weight:bold;
-            font-size:1rem;
-            border-radius:30px;
-            box-shadow:0 4px 10px rgba(0,0,0,0.15);
-            text-transform:uppercase;
-            margin-top:5px
-        }
-    </style>
+.error-msg{
+    color:red;
+    font-weight:bold;
+}
+</style>
 </head>
 <body>
 
 <div class="ticket-receipt">
     <h2>⌁ CONNEXION ⌁</h2>
-
-    <div id="dynamicContent">
-        Chargement du ticket...
-    </div>
-
-    <div style="margin-top:25px;text-align:center;border-top:1px dashed #a99c89;padding-top:15px;">
-        <div style="font-size:0.7rem;color:#4c1d95;text-transform:uppercase;margin-bottom:6px;">
-            Un service gratuit ?
-        </div>
-
-        <a href="https://ko-fi.com/VOTRE_PSEUDO_ICI" target="_blank" class="btn-link">
-            ☕ SOUTENIR
-        </a>
-
-        <div style="font-size:0.55rem;margin-top:8px;color:#475569;">
-            Créez votre ticket sur wifi-ticket
-        </div>
-    </div>
+    <div id="dynamicContent">Chargement...</div>
 </div>
 
 <script>
@@ -216,33 +102,24 @@
 
     function generateWifiQR(ssid,pwd){
         const qr=qrcode(0,'M');
-
         qr.addData(`WIFI:T:WPA;S:${ssid};P:${pwd};;`);
         qr.make();
-
         return qr.createImgTag(6);
     }
 
-    function escapeHtml(text){
-        const div=document.createElement('div');
-        div.textContent=text;
-        return div.innerHTML;
-    }
-
     async function processTicket(){
-
-        const hash=window.location.hash.substring(1);
         const content=document.getElementById('dynamicContent');
+        const hash=window.location.hash.substring(1);
 
         if(!hash){
-            content.innerHTML='<div class="error-msg">Aucun ticket</div>';
+            content.innerHTML='Aucun ticket';
             return;
         }
 
         const separatorIndex=hash.indexOf(':');
 
         if(separatorIndex===-1){
-            content.innerHTML='<div class="error-msg">Format invalide</div>';
+            content.innerHTML='Format invalide';
             return;
         }
 
@@ -252,52 +129,34 @@
         try{
             const key=await importKey(keyPart);
             const decrypted=await decryptData(key,dataPart);
-
             const data=JSON.parse(decrypted);
 
-            const {ssid,pwd,exp}=data;
-            const now=Date.now();
-
-            if(now>exp){
-                content.innerHTML=
-                    '<div class="status-badge expired-badge">⛔ EXPIRÉ</div>' +
-                    '<div style="padding:25px">' +
-                    '<div style="font-size:4rem">⌛</div>' +
-                    '<div class="error-msg">Ticket expiré le ' +
-                    new Date(exp).toLocaleTimeString('fr-FR') +
-                    '</div></div>';
+            if(Date.now()>data.exp){
+                content.innerHTML='<div class="error-msg">⛔ EXPIRÉ</div>';
                 return;
             }
 
-            const timeStr=new Date(exp).toLocaleTimeString('fr-FR',{
+            const timeStr=new Date(data.exp).toLocaleTimeString('fr-FR',{
                 hour:'2-digit',
                 minute:'2-digit'
             });
 
-            content.innerHTML=
-                '<div class="status-badge">✅ VALIDE</div>' +
-                '<div id="qrcode">' + generateWifiQR(ssid,pwd) + '</div>' +
-                '<div class="ssid-display">📶 ' + escapeHtml(ssid) + '</div>' +
-                '<div class="pwd-row">' +
-                '<span>🔑 ' + escapeHtml(pwd) + '</span>' +
-                '<button class="copy-btn" id="copyPasswordBtn">COPIER</button>' +
-                '</div>' +
-                '<div class="expiry-info">⌛ Expire à ' + timeStr + '</div>';
+            content.innerHTML=`
+                <div>✅ VALIDE</div>
+                <div id="qrcode">${generateWifiQR(data.ssid,data.pwd)}</div>
+                <div class="ssid-display">📶 ${data.ssid}</div>
+                <div class="pwd-row">
+                    🔑 ${data.pwd}
+                </div>
+                <div>⌛ Expire à ${timeStr}</div>
+            `;
 
-            document.getElementById('copyPasswordBtn')
-                .addEventListener('click',()=>{
-                    navigator.clipboard.writeText(pwd)
-                        .then(()=>alert('Copié !'))
-                        .catch(()=>prompt('Copie manuelle :',pwd));
-                });
-
-        }catch(error){
-            content.innerHTML='<div class="error-msg">Ticket corrompu</div>';
+        }catch(e){
+            content.innerHTML='Ticket corrompu';
         }
     }
 
     window.addEventListener('DOMContentLoaded',processTicket);
-    window.addEventListener('hashchange',processTicket);
 
 })();
 </script>
