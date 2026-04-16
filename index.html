@@ -27,28 +27,17 @@ body{
     box-shadow:0 20px 60px rgba(0,0,0,0.25);
 }
 
-/* ===== BRAND ===== */
 .brand-header{
     text-align:center;
     margin-bottom:24px;
 }
 
-.brand-logo{
-    display:flex;
-    justify-content:center;
-    margin-bottom:12px;
-}
-
 .brand-name{
     font-size:1.8rem;
     font-weight:800;
-    letter-spacing:1px;
     text-transform:uppercase;
-    color:#7c3aed; /* fallback */
     background:linear-gradient(135deg,#7c3aed,#2563eb);
-    background-clip:text;
     -webkit-background-clip:text;
-    color:transparent;
     -webkit-text-fill-color:transparent;
 }
 
@@ -56,15 +45,12 @@ body{
     font-size:0.78rem;
     color:#64748b;
     margin-top:6px;
-    text-transform:uppercase;
-    letter-spacing:0.8px;
 }
 
 h1{
     text-align:center;
     margin-bottom:25px;
     color:#4c1d95;
-    font-size:1.8rem;
 }
 
 .input-group{margin-bottom:22px}
@@ -73,10 +59,7 @@ label{
     display:block;
     margin-bottom:8px;
     font-weight:bold;
-    color:#334155;
 }
-
-.input-box{position:relative}
 
 input,select{
     width:100%;
@@ -87,32 +70,10 @@ input,select{
     background:#f8fafc;
 }
 
-.password-toggle{
-    position:absolute;
-    right:12px;
-    top:50%;
-    transform:translateY(-50%);
-    background:none;
-    border:none;
-    cursor:pointer;
-}
-
-.expiry-wrapper{
-    background:#f8fafc;
-    border:2px solid #cbd5e1;
-    border-radius:14px;
-    padding:12px;
-}
-
 .expiry-row{
     display:flex;
     gap:12px;
     align-items:center;
-    justify-content:center;
-}
-
-.expiry-row select{
-    width:120px;
 }
 
 .btn{
@@ -141,11 +102,24 @@ input,select{
     cursor:pointer;
 }
 
-.support-box{
+/* KO-FI */
+.kofi-box{
     margin-top:28px;
     padding-top:18px;
     border-top:1px dashed #cbd5e1;
     text-align:center;
+}
+
+.kofi-btn{
+    display:inline-block;
+    margin-top:10px;
+    background:#ffdd00;
+    color:black;
+    padding:12px 22px;
+    text-decoration:none;
+    border-radius:30px;
+    font-weight:bold;
+    box-shadow:0 4px 12px rgba(0,0,0,0.15);
 }
 </style>
 </head>
@@ -154,25 +128,6 @@ input,select{
 <div class="ticket">
 
     <div class="brand-header">
-        <div class="brand-logo">
-            <svg viewBox="0 0 100 100" width="72" height="72">
-                <defs>
-                    <linearGradient id="abGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#7c3aed"/>
-                        <stop offset="100%" stop-color="#2563eb"/>
-                    </linearGradient>
-                </defs>
-                <circle cx="50" cy="50" r="44" fill="url(#abGradient)"/>
-                <path d="M28 62 L40 35 L50 55 L60 28 L72 62"
-                    fill="none"
-                    stroke="white"
-                    stroke-width="6"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"/>
-                <circle cx="50" cy="50" r="6" fill="white"/>
-            </svg>
-        </div>
-
         <div class="brand-name">ABtime</div>
         <div class="brand-tagline">Software • Secure Wi-Fi Ticket</div>
     </div>
@@ -186,25 +141,19 @@ input,select{
 
     <div class="input-group">
         <label>🔐 Mot de passe</label>
-        <div class="input-box">
-            <input type="password" id="password" value="BienvenueChezMoi">
-            <button class="password-toggle" id="togglePassword">👁</button>
-        </div>
+        <input type="text" id="password" value="BienvenueChezMoi">
     </div>
 
     <div class="input-group">
         <label>⏳ Heure d’expiration</label>
-        <div class="expiry-wrapper">
-            <div class="expiry-row">
-                <select id="expiryHour"></select>
-                <span>:</span>
-                <select id="expiryMinute">
-                    <option value="0">00</option>
-                    <option value="15">15</option>
-                    <option value="30">30</option>
-                    <option value="45">45</option>
-                </select>
-            </div>
+        <div class="expiry-row">
+            <select id="expiryHour"></select>
+            <select id="expiryMinute">
+                <option value="0">00</option>
+                <option value="15">15</option>
+                <option value="30">30</option>
+                <option value="45">45</option>
+            </select>
         </div>
     </div>
 
@@ -213,11 +162,22 @@ input,select{
 
     <div id="previewUrl"></div>
 
+    <div class="kofi-box">
+        <div style="font-size:0.8rem;color:#64748b;">
+            ❤️ Vous aimez cet outil ?
+        </div>
+        <a href="https://sellerfit.github.io/wifi-ticket/" target="_blank" class="kofi-btn">
+            ☕ Offrir un café
+        </a>
+        <div style="font-size:0.65rem;margin-top:8px;color:#94a3b8;">
+            Soutenez le développement • Gratuit pour toujours
+        </div>
+    </div>
+
 </div>
 
 <script>
 (function(){
-
 const hourSelect=document.getElementById('expiryHour');
 
 for(let h=0;h<24;h++){
@@ -227,11 +187,6 @@ for(let h=0;h<24;h++){
     hourSelect.appendChild(option);
 }
 hourSelect.value='23';
-
-document.getElementById('togglePassword').onclick=function(){
-    const pwd=document.getElementById('password');
-    pwd.type=pwd.type==='password'?'text':'password';
-};
 
 async function generateKey(){
     return await crypto.subtle.generateKey(
@@ -281,26 +236,12 @@ async function createLink(ssid,pwd,exp){
 }
 
 function copyText(text){
-    if(navigator.clipboard){
-        navigator.clipboard.writeText(text)
-            .then(()=>alert('Lien copié'))
-            .catch(()=>fallbackCopy(text));
-    }else{
-        fallbackCopy(text);
-    }
+    navigator.clipboard.writeText(text)
+        .then(()=>alert('Lien copié'))
+        .catch(()=>alert(text));
 }
 
-function fallbackCopy(text){
-    const temp=document.createElement('textarea');
-    temp.value=text;
-    document.body.appendChild(temp);
-    temp.select();
-    document.execCommand('copy');
-    document.body.removeChild(temp);
-    alert('Lien copié');
-}
-
-async function generate(demo){
+async function generate(){
     const ssid=document.getElementById('ssid').value.trim();
     const pwd=document.getElementById('password').value.trim();
 
@@ -311,12 +252,11 @@ async function generate(demo){
     const preview=document.getElementById('previewUrl');
     preview.style.display='block';
     preview.innerHTML='🔗 CLIQUEZ POUR COPIER<br><br>'+link;
-
     preview.onclick=()=>copyText(link);
 }
 
-document.getElementById('generateBtn').onclick=()=>generate(false);
-document.getElementById('demoBtn').onclick=()=>generate(true);
+document.getElementById('generateBtn').onclick=generate;
+document.getElementById('demoBtn').onclick=generate;
 
 })();
 </script>
