@@ -1,4 +1,139 @@
+# 1) `index.html` — Générateur de ticket Wi‑Fi
+
+```html
 <!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wi-Fi Ticket</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      background: linear-gradient(135deg, #0f172a, #7c3aed);
+    }
+    .ticket {
+      width: 100%;
+      max-width: 500px;
+      background: white;
+      border-radius: 20px;
+      padding: 30px 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #4c1d95;
+    }
+    .subhead {
+      text-align: center;
+      margin-bottom: 24px;
+      color: #64748b;
+      font-size: .85rem;
+    }
+    .input-group { margin-bottom: 18px; }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-family: inherit;
+    }
+    .expiry-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      background: linear-gradient(135deg, #7c3aed, #2563eb);
+    }
+    .btn.secondary {
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+    }
+    #previewUrl {
+      margin-top: 16px;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      word-break: break-all;
+      display: none;
+    }
+    .btn-link {
+      display: block;
+      margin-top: 16px;
+      text-align: center;
+      text-decoration: none;
+      padding: 12px;
+      border-radius: 12px;
+      background: #ffdd00;
+      color: black;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="ticket">
+    <h1>WIFI TICKET</h1>
+    <div class="subhead">ÉDITION LIMITÉE · EXPIRATION AUTO</div>
+
+    <div class="input-group">
+      <label>📶 SSID</label>
+      <input type="text" id="ssid" value="MonWiFi" />
+    </div>
+
+    <div class="input-group">
+      <label>🔐 Mot de passe</label>
+      <input type="text" id="password" value="BienvenueChezMoi" />
+    </div>
+
+    <div class="input-group">
+      <label>⏳ Expire à</label>
+      <div class="expiry-row">
+        <select id="expiryHour"></select>
+        <span>H</span>
+        <select id="expiryMinute">
+          <option value="0">00</option>
+          <option value="15">15</option>
+          <option value="30">30</option>
+          <option value="45">45</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn" id="generateBtn">🎫 GÉNÉRER LE TICKET</button>
+    <button class="btn secondary" id="demoBtn">🧪 DÉMO (3 min)</button>
+
+    <div id="previewUrl"></div>
+
+    <a href="https://ko-fi.com/VOTRE_PSEUDO_ICI" target="_blank" class="btn-link">☕ OFFRIR UN CAFÉ</a>
+  </div>
+
+  <script>
+    (() => {
+      const hourSelect = document.getElementById('expiryHour');
+      const preview = document.getElementById('previewUrl');
+
+      for (let h = 0; h < 24; h++) {
+        const option = document.createElement('option');
         option.value = h;
         option.textContent = String(h).padStart(2, '0');
         hourSelect.appendChild(option);
@@ -78,3 +213,151 @@
   </script>
 </body>
 </html>
+```
+
+---
+
+# 2) `connect.html` — Lecture du ticket
+
+```html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connexion Wi-Fi</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #2b2b2b;
+      font-family: 'Courier New', monospace;
+      padding: 16px;
+    }
+    .ticket-receipt {
+      width: 100%;
+      max-width: 500px;
+      background: #f9f6f0;
+      padding: 24px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    #qrcode {
+      margin: 20px 0;
+      background: white;
+      padding: 16px;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      color: white;
+      background: green;
+      margin-bottom: 16px;
+    }
+    .expired-badge {
+      background: darkred;
+    }
+    .copy-btn {
+      margin-top: 10px;
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="ticket-receipt">
+    <h2>⌁ CONNEXION ⌁</h2>
+    <div id="dynamicContent">Chargement du ticket...</div>
+  </div>
+
+  <script>
+    (() => {
+      function fromBase64(base64) {
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        return bytes.buffer;
+      }
+
+      async function importKey(key64) {
+        return crypto.subtle.importKey(
+          'raw',
+          fromBase64(key64),
+          { name: 'AES-GCM' },
+          false,
+          ['decrypt']
+        );
+      }
+
+      async function decryptData(key, data64) {
+        const buffer = fromBase64(data64);
+        const bytes = new Uint8Array(buffer);
+        const iv = bytes.slice(0, 12);
+        const cipher = bytes.slice(12);
+
+        const decrypted = await crypto.subtle.decrypt(
+          { name: 'AES-GCM', iv },
+          key,
+          cipher
+        );
+
+        return new TextDecoder().decode(decrypted);
+      }
+
+      function generateWifiQR(ssid, pwd) {
+        const qr = qrcode(0, 'M');
+        qr.addData(`WIFI:T:WPA;S:${ssid};P:${pwd};;`);
+        qr.make();
+        return qr.createImgTag(6);
+      }
+
+      async function processTicket() {
+        const content = document.getElementById('dynamicContent');
+        const hash = window.location.hash.substring(1);
+
+        if (!hash) {
+          content.innerHTML = 'Aucun ticket';
+          return;
+        }
+
+        const [key64, data64] = hash.split(':');
+
+        try {
+          const key = await importKey(key64);
+          const decrypted = await decryptData(key, data64);
+          const data = JSON.parse(decrypted);
+
+          if (Date.now() > data.exp) {
+            content.innerHTML = '<div class="status-badge expired-badge">⛔ EXPIRÉ</div>';
+            return;
+          }
+
+          const timeStr = new Date(data.exp).toLocaleTimeString('fr-FR', {
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+          content.innerHTML = `
+            <div class="status-badge">✅ VALIDE</div>
+            <div id="qrcode">${generateWifiQR(data.ssid, data.pwd)}</div>
+            <div>📶 ${data.ssid}</div>
+            <div>🔑 ${data.pwd}</div>
+            <div>⌛ Expire à ${timeStr}</div>
+          `;
+        } catch (e) {
+          content.innerHTML = 'Ticket corrompu';
+        }
+      }
+
+      window.addEventListener('DOMContentLoaded', processTicket);
+      window.addEventListener('hashchange', processTicket);
+    })();
+  </script>
+</body>
+</html>
+```
