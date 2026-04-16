@@ -1,303 +1,80 @@
 <!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Wi-Fi Ticket · Édition Apéro</title>
-    <style>
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
+        option.value = h;
+        option.textContent = String(h).padStart(2, '0');
+        hourSelect.appendChild(option);
+      }
+      hourSelect.value = '23';
+
+      async function generateKey() {
+        return crypto.subtle.generateKey(
+          { name: 'AES-GCM', length: 256 },
+          true,
+          ['encrypt', 'decrypt']
+        );
+      }
+
+      async function encryptData(key, text) {
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const encoded = new TextEncoder().encode(text);
+        const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
+
+        const result = new Uint8Array(iv.length + cipher.byteLength);
+        result.set(iv, 0);
+        result.set(new Uint8Array(cipher), iv.length);
+        return result;
+      }
+
+      function toBase64(buffer) {
+        return btoa(String.fromCharCode(...buffer));
+      }
+
+      async function exportKey(key) {
+        const raw = await crypto.subtle.exportKey('raw', key);
+        return toBase64(new Uint8Array(raw));
+      }
+
+      function getExpiry(hour, minute) {
+        const d = new Date();
+        d.setHours(hour, minute, 0, 0);
+        return d.getTime();
+      }
+
+      async function createLink(ssid, pwd, expiry) {
+        const payload = JSON.stringify({ ssid, pwd, exp: expiry });
+        const key = await generateKey();
+        const encrypted = await encryptData(key, payload);
+
+        const key64 = await exportKey(key);
+        const data64 = toBase64(encrypted);
+
+        const base = window.location.href.replace(/index\.html$/, '');
+        return `${base}connect.html#${key64}:${data64}`;
+      }
+
+      async function generateTicket(isDemo = false) {
+        const ssid = document.getElementById('ssid').value.trim();
+        const pwd = document.getElementById('password').value.trim();
+
+        if (!ssid || !pwd) {
+          alert('Veuillez remplir tous les champs');
+          return;
         }
 
-        body { 
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #7c3aed 100%);
-            background-size: 200% 200%;
-            animation: bgMove 10s ease infinite;
-            min-height: 100vh; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-family: 'Courier New', Courier, monospace; 
-            padding: 16px; 
-        }
+        const expiry = isDemo
+          ? Date.now() + 3 * 60 * 1000
+          : getExpiry(
+              parseInt(hourSelect.value),
+              parseInt(document.getElementById('expiryMinute').value)
+            );
 
-        @keyframes bgMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+        const link = await createLink(ssid, pwd, expiry);
+        preview.style.display = 'block';
+        preview.innerHTML = `<strong>Lien :</strong><br>${link}`;
+      }
 
-        .ticket { 
-            max-width: 500px; 
-            width: 100%; 
-            background: linear-gradient(145deg, #ffffff, #f8fafc);
-            padding: 30px 20px 25px; 
-            border-radius: 20px; 
-            box-shadow: 
-                0 20px 60px rgba(0,0,0,0.35),
-                0 0 25px rgba(124,58,237,0.25);
-            border: 1px solid rgba(255,255,255,0.4); 
-            position: relative;
-            animation: floatCard 4s ease-in-out infinite;
-            transition: all 0.3s ease;
-        }
-
-        .ticket:hover {
-            transform: translateY(-5px) scale(1.01);
-            box-shadow: 
-                0 30px 80px rgba(0,0,0,0.4),
-                0 0 35px rgba(124,58,237,0.35);
-        }
-
-        @keyframes floatCard {
-            0%,100% { transform: translateY(0px); }
-            50% { transform: translateY(-6px); }
-        }
-
-        .ticket::before, 
-        .ticket::after { 
-            content: ""; 
-            position: absolute; 
-            left: 10px; 
-            right: 10px; 
-            height: 4px; 
-            background: repeating-linear-gradient(
-                90deg, 
-                #7c3aed, 
-                #7c3aed 8px, 
-                transparent 8px, 
-                transparent 16px
-            ); 
-        }
-
-        .ticket::before { top: 12px; } 
-        .ticket::after { bottom: 12px; }
-
-        h1 { 
-            font-size: 2.2rem; 
-            font-weight: 700; 
-            text-align: center; 
-            color: #4c1d95; 
-            text-transform: uppercase; 
-            border-bottom: 2px dashed #7c3aed; 
-            padding-bottom: 10px; 
-            margin-bottom: 20px;
-            letter-spacing: 2px;
-            text-shadow: 0 2px 6px rgba(124,58,237,0.15);
-        }
-
-        .subhead { 
-            text-align: center; 
-            font-size: 0.8rem; 
-            color: #475569; 
-            margin-top: -15px; 
-            margin-bottom: 25px; 
-            text-transform: uppercase;
-        }
-
-        .input-group { 
-            margin-bottom: 20px; 
-        }
-
-        label { 
-            display: block; 
-            font-size: 0.9rem; 
-            font-weight: bold; 
-            text-transform: uppercase; 
-            color: #334155; 
-            margin-bottom: 7px; 
-        }
-
-        input,
-        select {
-            width: 100%;
-            padding: 13px;
-            background: #ffffff;
-            border: 2px solid #cbd5e1;
-            border-radius: 12px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 1rem;
-            transition: all 0.25s ease;
-        }
-
-        input:focus,
-        select:focus {
-            outline: none;
-            border-color: #7c3aed;
-            box-shadow: 0 0 0 5px rgba(124,58,237,0.18);
-            transform: scale(1.01);
-        }
-
-        .expiry-row { 
-            display: flex; 
-            gap: 10px; 
-            align-items: center; 
-        }
-
-        .expiry-row select, 
-        .expiry-row input { 
-            flex: 1; 
-        }
-
-        .hint { 
-            font-size: 0.75rem; 
-            color: #64748b; 
-            margin-top: 6px; 
-            text-align: right; 
-        }
-
-        .btn { 
-            background: linear-gradient(135deg, #7c3aed, #2563eb);
-            border: none; 
-            padding: 14px; 
-            font-family: 'Courier New', Courier, monospace; 
-            font-weight: bold; 
-            font-size: 1rem; 
-            text-transform: uppercase; 
-            color: white; 
-            box-shadow: 0 8px 20px rgba(37,99,235,0.35);
-            cursor: pointer; 
-            text-align: center;
-            border-radius: 14px;
-            transition: all 0.25s ease;
-            width: 100%;
-        }
-
-        .btn:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 12px 28px rgba(124,58,237,0.45);
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn.secondary { 
-            background: linear-gradient(135deg, #f59e0b, #ef4444);
-            box-shadow: 0 8px 20px rgba(239,68,68,0.3);
-        }
-
-        /* Nouveau style pour le bouton Ko-fi (uniformisé) */
-        .btn-link {
-            display: block;
-            width: 100%;
-            background: #ffdd00;
-            color: #000000;
-            padding: 14px;
-            font-family: 'Courier New', Courier, monospace;
-            font-weight: bold;
-            font-size: 1rem;
-            text-transform: uppercase;
-            text-align: center;
-            text-decoration: none;
-            border: none;
-            border-radius: 14px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            cursor: pointer;
-            transition: all 0.25s ease;
-        }
-
-        .btn-link:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 12px 28px rgba(0,0,0,0.3);
-        }
-
-        .footer-note {
-            margin-top: 12px;
-            font-size: 0.75rem;
-            color: #475569;
-            letter-spacing: 1px;
-            text-align: center;
-        }
-
-        #previewUrl { 
-            background: linear-gradient(135deg, #ede9fe, #dbeafe);
-            padding: 12px; 
-            font-size: 0.75rem; 
-            word-break: break-all; 
-            border: 1px solid #7c3aed; 
-            margin-top: 15px; 
-            display: none;
-            border-radius: 12px;
-            animation: fadeInUp 0.45s ease;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(12px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    </style>
-</head>
-<body>
-<div class="ticket">
-    <h1>WIFI TICKET</h1>
-    <div class="subhead">ÉDITION LIMITÉE · EXPIRATION AUTO</div>
-
-    <div class="input-group">
-        <label>📶 SSID (Nom du réseau)</label>
-        <input type="text" id="ssid" placeholder="Livebox-1234" value="MonWiFi">
-    </div>
-
-    <div class="input-group">
-        <label>🔐 Mot de passe</label>
-        <input type="text" id="password" placeholder="Apéro2026!" value="BienvenueChezMoi">
-    </div>
-
-    <div class="input-group">
-        <label>⏳ Expire à</label>
-        <div class="expiry-row">
-            <select id="expiryHour" style="background:#fffcf5; border:1.5px solid #bfb6a4; padding:12px; font-family:monospace;"></select>
-            <span>H</span>
-            <select id="expiryMinute" style="background:#fffcf5; border:1.5px solid #bfb6a4; padding:12px; font-family:monospace;">
-                <option value="0">00</option>
-                <option value="15">15</option>
-                <option value="30">30</option>
-                <option value="45">45</option>
-            </select>
-        </div>
-        <div class="hint">Le lien deviendra inactif après cette heure.</div>
-    </div>
-
-    <!-- Conteneur flexible pour aligner tous les boutons -->
-    <div style="display: flex; flex-direction: column; gap: 12px; margin: 20px 0;">
-        <button class="btn" id="generateBtn">🎫 GÉNÉRER LE TICKET</button>
-        <button class="btn secondary" id="demoBtn">🧪 DÉMO (expire dans 3 min)</button>
-    </div>
-
-    <div id="previewUrl"></div>
-    <div class="footer-note">SCANNEZ · CONNECTÉ · ZÉRO SERVEUR</div>
-
-    <!-- SOUTIEN KO-FI -->
-    <div style="margin-top: 20px; width: 100%;">
-        <a href="https://ko-fi.com/VOTRE_PSEUDO_ICI" target="_blank" class="btn-link">☕ OFFRIR UN CAFÉ</a>
-        <div style="font-size: 0.6rem; margin-top: 8px; color: #475569; text-align: center;">Soutenez le développement • 100% gratuit pour toujours</div>
-    </div>
-</div>
-
-<script>
-    (function() {
-        const hourSelect = document.getElementById('expiryHour');
-        for (let h=0;h<24;h++){ let o=document.createElement('option'); o.value=h; o.textContent=h.toString().padStart(2,'0'); hourSelect.appendChild(o); }
-        hourSelect.value='23';
-        async function generateKey(){ return await window.crypto.subtle.generateKey({name:"AES-GCM",length:256},true,["encrypt","decrypt"]); }
-        async function encryptData(key,plaintext){ const iv=window.crypto.getRandomValues(new Uint8Array(12)); const enc=new TextEncoder().encode(plaintext); const cipher=await window.crypto.subtle.encrypt({name:"AES-GCM",iv},key,enc); const combined=new Uint8Array(iv.length+cipher.byteLength); combined.set(iv,0); combined.set(new Uint8Array(cipher),iv.length); return combined; }
-        async function exportKey(key){ const exp=await window.crypto.subtle.exportKey("raw",key); return btoa(String.fromCharCode(...new Uint8Array(exp))); }
-        function arrayBufferToBase64(b){ return btoa(String.fromCharCode(...new Uint8Array(b))); }
-        async function createEncryptedLink(ssid,pwd,expiry){ const payload=JSON.stringify({ssid:ssid,pwd:pwd,exp:expiry}); const key=await generateKey(); const encBuf=await encryptData(key,payload); const encB64=arrayBufferToBase64(encBuf); const keyB64=await exportKey(key); const base=window.location.href.replace(/index\.html$/,'').replace(/\/$/,''); return base+'/connect.html#'+keyB64+':'+encB64; }
-        function getExpiryTimestamp(h,m){ const d=new Date(); d.setHours(h,m,0,0); return d.getTime(); }
-        function getDemoExpiry(){ return Date.now()+3*60*1000; }
-        async function generateAndShow(demo){ let ssid=document.getElementById('ssid').value.trim(), pwd=document.getElementById('password').value.trim(); if(!ssid||!pwd){alert('Remplissez SSID et mot de passe');return;} let exp=demo?getDemoExpiry():getExpiryTimestamp(parseInt(hourSelect.value),parseInt(document.getElementById('expiryMinute').value)); try{ const link=await createEncryptedLink(ssid,pwd,exp); const prev=document.getElementById('previewUrl'); prev.style.display='block'; prev.innerHTML='<div style="margin-bottom:8px;">🔗 LIEN (cliquez pour copier)</div><div style="background:#f4ede1; padding:10px; border:1px solid #a79b88; word-break:break-all;" id="copyLink">'+link+'</div>'; document.getElementById('copyLink').addEventListener('click',function(){ navigator.clipboard?.writeText(link).then(()=>alert('Copié !')).catch(()=>prompt('Copie manuelle:',link)); }); }catch(e){alert('Erreur: '+e);} }
-        document.getElementById('generateBtn').addEventListener('click',()=>generateAndShow(false));
-        document.getElementById('demoBtn').addEventListener('click',()=>generateAndShow(true));
+      document.getElementById('generateBtn').addEventListener('click', () => generateTicket(false));
+      document.getElementById('demoBtn').addEventListener('click', () => generateTicket(true));
     })();
-</script>
+  </script>
 </body>
 </html>
