@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ABtime • Wi-Fi Ticket Generator</title>
 <style>
-body { font-family:'Courier New', monospace; min-height:100vh; display:flex; justify-content:center; align-items:center; background:linear-gradient(135deg,#0f172a,#7c3aed); padding:20px; }
+body { font-family:'Courier New', monospace; min-height:100vh; display:flex; justify-content:center; align-items:center; background:linear-gradient(135deg,#0f172a,#7c3aed); padding:20px; margin:0;}
 .ticket { width:100%; max-width:560px; background:white; border-radius:22px; padding:30px; box-shadow:0 20px 60px rgba(0,0,0,0.25); }
 .brand-name { text-align:center; font-size:1.6rem; font-weight:800; background:linear-gradient(135deg,#7c3aed,#2563eb); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 .brand-tagline { text-align:center; font-size:0.78rem; color:#64748b; margin-bottom:20px; text-transform:uppercase; }
@@ -83,10 +83,13 @@ async function encryptData(key,text){
 function toBase64(buf){return btoa(String.fromCharCode(...buf));}
 async function exportKey(key){const raw=await crypto.subtle.exportKey("raw",key); return toBase64(new Uint8Array(raw));}
 async function createLink(ssid,pwd,exp){
-  const payload=JSON.stringify({ssid,pwd,exp});
-  const key=await generateKey();
-  const encrypted=await encryptData(key,payload);
-  return window.location.origin + '/connect.html#'+await exportKey(key)+':'+toBase64(encrypted);
+    const payload=JSON.stringify({ssid,pwd,exp});
+    const key=await generateKey();
+    const encrypted=await encryptData(key,payload);
+    const key64=await exportKey(key);
+    const data64=toBase64(encrypted);
+    const base = window.location.href.replace(/index\.html$/,''); 
+    return base + 'connect.html#' + key64 + ':' + data64;
 }
 
 function getExpiryTimestamp(h,m){const d=new Date(); d.setHours(h,m,0,0); return d.getTime();}
