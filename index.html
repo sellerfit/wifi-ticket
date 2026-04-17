@@ -6,104 +6,41 @@
   <title>ABtime • Wi-Fi Ticket Generator</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      font-family:'Courier New',monospace;
-      min-height:100vh;
-      background:linear-gradient(135deg,#0f172a,#4c1d95,#7c3aed);
-      display:flex;flex-direction:column;align-items:center;justify-content:center;
-      color:white;padding:20px;text-align:center;
-    }
-    .logo{
-      width:100px;height:100px;margin-bottom:20px;
-      background:linear-gradient(135deg,#7c3aed,#2563eb);
-      border-radius:50%;display:flex;align-items:center;justify-content:center;
-      box-shadow:0 10px 40px rgba(124,58,237,.4);
-    }
+    body{font-family:'Courier New',monospace;min-height:100vh;background:linear-gradient(135deg,#0f172a,#4c1d95,#7c3aed);display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;padding:20px;text-align:center}
+    .logo{width:100px;height:100px;margin-bottom:20px;background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 40px rgba(124,58,237,.4)}
     .logo svg{width:60px;height:60px}
     h1{font-size:2rem;margin-bottom:10px}
     .tagline{color:#cbd5e1;margin-bottom:30px;font-size:1.1rem}
-    .features{
-      display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-      gap:15px;max-width:700px;width:100%;margin-bottom:40px;
-    }
-    .feature{
-      background:rgba(255,255,255,.1);padding:15px;border-radius:12px;
-      backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2);
-    }
+    .features{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;max-width:700px;width:100%;margin-bottom:40px}
+    .feature{background:rgba(255,255,255,.1);padding:15px;border-radius:12px;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2)}
     .feature h3{margin-bottom:8px;font-size:1.1rem}
     .feature p{font-size:.9rem;color:#cbd5e1}
-    .btn{
-      padding:16px 32px;border:none;border-radius:14px;
-      background:linear-gradient(135deg,#7c3aed,#2563eb);
-      color:white;font-weight:bold;font-size:1rem;cursor:pointer;
-      text-transform:uppercase;transition:transform .2s,box-shadow .2s;
-    }
+    .btn{padding:16px 32px;border:none;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;font-weight:bold;font-size:1rem;cursor:pointer;text-transform:uppercase;transition:transform .2s,box-shadow .2s}
     .btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(124,58,237,.4)}
-    .btn-outline{
-      background:transparent;border:2px solid white;margin-left:10px;
-    }
+    .btn-outline{background:transparent;border:2px solid white;margin:10px 0 0 0}
     .btn-outline:hover{background:rgba(255,255,255,.1)}
-    .footer{
-      margin-top:40px;font-size:.85rem;color:#94a3b8;
-    }
-    .kofi{
-      position:fixed;bottom:20px;right:20px;
-      background:#ffdd00;color:#000;padding:12px 18px;
-      border-radius:12px;text-decoration:none;font-weight:bold;
-      box-shadow:0 8px 25px rgba(0,0,0,.3);z-index:100;
-    }
-    @media(max-width:600px){
-      .btn{width:100%;margin:5px 0}.btn-outline{margin-left:0}
-    }
+    .footer{margin-top:40px;font-size:.85rem;color:#94a3b8}
+    .kofi{position:fixed;bottom:20px;right:20px;background:#ffdd00;color:#000;padding:12px 18px;border-radius:12px;text-decoration:none;font-weight:bold;box-shadow:0 8px 25px rgba(0,0,0,.3);z-index:100}
+    @media(max-width:600px){.btn,.btn-outline{width:100%}}
   </style>
 </head>
 <body>
-  <div class="logo">
-    <svg viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="44" fill="white" opacity=".2"/>
-      <path d="M28 62 L40 35 L50 55 L60 28 L72 62" 
-            fill="none" stroke="white" stroke-width="6" 
-            stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="50" cy="50" r="6" fill="white"/>
-    </svg>
-  </div>
-  
+  <div class="logo"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="white" opacity=".2"/><path d="M28 62 L40 35 L50 55 L60 28 L72 62" fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="50" r="6" fill="white"/></svg></div>
   <h1>ABtime</h1>
   <p class="tagline">Générez des tickets Wi-Fi sécurisés en 30 secondes</p>
-  
   <div class="features">
-    <div class="feature">
-      <h3>🔐 Chiffré</h3>
-      <p>AES-GCM 256 bits, tout côté client</p>
-    </div>
-    <div class="feature">
-      <h3>🎨 Personnalisable</h3>
-      <p>Logo, couleurs, message de bienvenue</p>
-    </div>
-    <div class="feature">
-      <h3>📜 Historique</h3>
-      <p>Vos tickets sauvegardés localement</p>
-    </div>
-    <div class="feature">
-      <h3>🔗 URL courte</h3>
-      <p>Partage facile avec raccourcisseur intégré</p>
-    </div>
+    <div class="feature"><h3>🔐 Chiffré</h3><p>AES-GCM 256 bits, tout côté client</p></div>
+    <div class="feature"><h3>🎨 Personnalisable</h3><p>Logo, couleurs, message de bienvenue</p></div>
+    <div class="feature"><h3>📜 Historique</h3><p>Vos tickets sauvegardés localement</p></div>
+    <div class="feature"><h3>🔗 URL courte</h3><p>Partage facile avec raccourcisseur intégré</p></div>
   </div>
   
-  <div>
-    <button class="btn" onclick="location.href='generator.html'">🚀 Commencer</button>
-    <button class="btn btn-outline" onclick="location.href='connect.html#demo'">🧪 Démo</button>
-  </div>
-
-  <div>
+  <!-- BOUTONS D'ACTION -->
   <button class="btn" onclick="location.href='generator.html'">🚀 Commencer</button>
   <button class="btn btn-outline" onclick="location.href='connect.html#demo'">🧪 Démo</button>
-  <!-- 👇 NOUVEAU BOUTON 👇 -->
   <button class="btn btn-outline" onclick="location.href='qr-premium.html'">🖨️ Carte Wi-Fi / QR</button>
-</div>
   
   <p class="footer">© 2026 ABtime • 100% gratuit • Open Source</p>
-  
   <a href="https://ko-fi.com/sellerfit" target="_blank" class="kofi">☕ Ko-fi</a>
 </body>
 </html>
