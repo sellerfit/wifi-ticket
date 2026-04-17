@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ABtime • Wi-Fi Premium</title>
+  <style>
+    :root{
+      /* 🎨 COULEUR ORIGINELLE RESTAURÉE */
+      --p: #7c3aed; 
+      --p-light: #8b5cf6;
+      --d: #0f172a; --m: #475569; --b: #f8fafc; --bd: #e2e8f0;
+    }
+    
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Inter','Segoe UI',system-ui,sans-serif;
+      background: radial-gradient(circle at 10% 20%, rgba(124, 58, 237, 0.05) 0%, transparent 40%),
+                  radial-gradient(circle at 90% 80%, rgba(37, 99, 235, 0.05) 0%, transparent 40%),
+                  var(--b);
+      display:flex; justify-content:center; align-items:center;
+      min-height:100vh; padding:20px;
+    }
+
+    /* ✨ Animation d'entrée */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card{
+      background:#fff;
+      max-width:540px; width:100%;
+      border-radius:24px;
+      box-shadow:0 20px 40px rgba(124,58,237,0.12);
+      border:1px solid var(--bd);
+      padding:50px 40px;
+      text-align:center;
+      position:relative;
+      animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    /* Logo avec animation flottante */
+    .logo-placeholder{
+      width:60px; height:60px;
+      background:linear-gradient(135deg,var(--p),#2563eb);
+      border-radius:16px; margin:0 auto 20px;
+      display:flex; align-items:center; justify-content:center;
+      color:#fff; font-weight:800; font-size:1.5rem;
+      box-shadow:0 8px 20px rgba(124,58,237,0.3);
+      animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .logo { height:60px; margin:0 auto 20px; display:block; border-radius:12px; }
+
+    .brand{color:var(--p);font-weight:800;font-size:1.2rem;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+    .title{font-size:1.6rem;font-weight:700;color:var(--d);margin-bottom:15px;line-height:1.3;min-height:80px}
+    .desc{color:var(--m);line-height:1.6;margin-bottom:30px;font-size:0.95rem;max-width:420px;margin-left:auto;margin-right:auto}
+
+    /* 🌍 Sélecteur de Langue "Pill" Premium */
+    .lang-selector {
+      position:absolute; top:20px; right:20px; width: 100px; z-index: 100;
+    }
+    .lang-current {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      background: #fff; border: 1px solid var(--bd);
+      padding: 8px 12px; border-radius: 20px;
+      cursor: pointer; font-weight: 600; font-size: 0.85rem; color: var(--d);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: all 0.3s ease;
+    }
+    .lang-current:hover { transform: scale(1.05); border-color: var(--p); color: var(--p); }
+    .lang-current span.icon { transition: transform 0.3s; }
+    .lang-selector:hover .lang-current span.icon { transform: rotate(180deg); }
+
+    .lang-options {
+      position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+      margin-top: 8px; background: #fff; border: 1px solid var(--bd); border-radius: 16px;
+      padding: 8px; min-width: 140px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      opacity: 0; visibility: hidden; transform: translateX(-50%) translateY(-10px);
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .lang-selector:hover .lang-options {
+      opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+    }
+    .lang-opt {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 12px; border-radius: 8px; cursor: pointer;
+      font-size: 0.85rem; color: var(--m); transition: background 0.2s;
+    }
+    .lang-opt:hover { background: #f1f5f9; color: var(--d); }
+    .lang-opt.active { background: rgba(124,58,237,0.1); color: var(--p); font-weight: 700; }
+    
+    /* Contenu Langue */
+    [data-lang-content] { display: none; animation: fadeInUp 0.4s ease; }
+    [data-lang-content].active { display: block; }
+    
+    /* Étapes */
+    .steps{display:flex;justify-content:center;gap:12px;margin-bottom:30px;flex-wrap:wrap}
+    .step{background:#fff;border:1px solid var(--bd);padding:12px 14px;border-radius:12px;font-size:.83rem;color:var(--d);flex:1;min-width:110px;transition:transform 0.2s}
+    .step:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .step .num{display:inline-flex;align-items:center;justify-content:center;background:var(--p);color:#fff;width:22px;height:22px;border-radius:50%;font-weight:700;font-size:.7rem;margin-right:6px}
+    
+    /* QR Code avec effet Pulse */
+    .qr-box{
+      background:#fff; padding:16px; border-radius:20px;
+      display:inline-block; margin-bottom:30px;
+      border: 2px dashed var(--bd); position: relative;
+    }
+    .qr-box img{width:200px;height:200px;display:block;border-radius:8px}
+    .qr-box::before {
+      content:''; position:absolute; inset:-1px; border-radius:20px;
+      border: 2px solid var(--p); opacity: 0.3;
+      animation: pulseBorder 3s infinite;
+    }
+    @keyframes pulseBorder {
+      0% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.02); opacity: 0.1; }
+      100% { transform: scale(1); opacity: 0.5; }
+    }
+    
+    /* Footer (TA VERSION PRÉFÉRÉE) */
+    .footer{
+      margin-top:24px; padding-top:18px; border-top:1px solid var(--bd);
+      font-size:.8rem; color:#64748b; display:flex; justify-content:center; 
+      gap:12px; flex-wrap:wrap; align-items:center;
+    }
+    .footer span { white-space: nowrap; }
+    .footer .powered { color: var(--p); font-weight: 700; }
+    
+    /* Print Button */
+    .print-btn{
+      position:fixed;bottom:24px;right:24px;background:var(--p);color:#fff;border:none;
+      padding:14px 24px;border-radius:50px;font-weight:600;cursor:pointer;
+      box-shadow:0 8px 24px rgba(124,58,237,.4);transition:transform .2s;z-index:100;
+    }
+    .print-btn:hover{transform:translateY(-3px) scale(1.05)}
+    
+    @media print{
+      body{background:#fff;padding:0}
+      .card{box-shadow:none;border:none;max-width:100%;padding:0}
+      .lang-selector, .print-btn { display:none !important; }
+      .qr-box{border:2px solid #000;padding:10px}
+      .step{background:#fff;border:1px solid #333}
+      .footer{color:#000}
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  
+  <!-- 🌍 Sélecteur de Langue Flottant -->
+  <div class="lang-selector">
+    <div class="lang-current">
+      <span id="flagDisplay">🇫🇷</span>
+      <span id="langDisplay">Français</span>
+      <span class="icon">▼</span>
+    </div>
+    <div class="lang-options">
+      <div class="lang-opt active" onclick="setLang('fr')">🇫🇷 Français</div>
+      <div class="lang-opt" onclick="setLang('en')">🇬🇧 English</div>
+      <div class="lang-opt" onclick="setLang('es')">🇪🇸 Español</div>
+    </div>
+  </div>
+
+  <!-- Logo -->
+  <div class="logo-placeholder" title="Remplace par ton logo">AB</div>
+  <!-- Pour image : <img src="ton-logo.png" alt="Logo" class="logo"> -->
+
+  <div class="brand">ABtime • Secure Wi-Fi</div>
+
+  <!-- Contenu FR -->
+  <div data-lang-content="fr" class="active">
+    <h1 class="title">Accédez au Wi-Fi Sécurisé</h1>
+    <p class="desc">Scannez ce QR code pour générer votre ticket d'accès personnel. Connexion instantanée, chiffrée et temporaire.</p>
+    <div class="steps">
+      <div class="step"><span class="num">1</span>Scannez le code</div>
+      <div class="step"><span class="num">2</span>Générez votre ticket</div>
+      <div class="step"><span class="num">3</span>Connectez-vous</div>
+    </div>
+  </div>
+  
+  <!-- Contenu EN -->
+  <div data-lang-content="en">
+    <h1 class="title">Access Secure Wi-Fi</h1>
+    <p class="desc">Scan this QR code to generate your personal access ticket. Instant, encrypted, and temporary connection.</p>
+    <div class="steps">
+      <div class="step"><span class="num">1</span>Scan the code</div>
+      <div class="step"><span class="num">2</span>Generate your ticket</div>
+      <div class="step"><span class="num">3</span>Connect instantly</div>
+    </div>
+  </div>
+
+  <!-- Contenu ES -->
+  <div data-lang-content="es">
+    <h1 class="title">Acceda al Wi-Fi Seguro</h1>
+    <p class="desc">Escanee este código QR para generar su tique de acceso personal. Conexión instantánea, cifrada y temporal.</p>
+    <div class="steps">
+      <div class="step"><span class="num">1</span>Escanee el código</div>
+      <div class="step"><span class="num">2</span>Genere su tique</div>
+      <div class="step"><span class="num">3</span>Conéctese</div>
+    </div>
+  </div>
+  
+  <!-- 🔗 QR Code (Modifiez l'URL ici) -->
+  <div class="qr-box">
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=https://sellerfit.github.io/wifi-ticket/&bgcolor=ffffff&color=0f172a&margin=10&format=svg" alt="QR Code" id="qrImg">
+  </div>
+  
+  <!-- ✅ TON FOOTER PRÉFÉRÉ -->
+  <div class="footer">
+    <span>🔐 Chiffrement AES‑256</span>
+    <span>⏳ Accès à durée contrôlée</span>
+    <span>📱 iOS / Android</span>
+    <span class="powered">Powered by ABtime</span>
+  </div>
+</div>
+
+<button class="print-btn" onclick="window.print()">🖨️ Imprimer / Export PDF</button>
+
+<script>
+const langConfig = {
+  fr: { flag: '🇫🇷', name: 'Français' },
+  en: { flag: '🇬🇧', name: 'English' },
+  es: { flag: '🇪🇸', name: 'Español' }
+};
+
+function setLang(lang){
+  const cfg = langConfig[lang];
+  document.getElementById('flagDisplay').textContent = cfg.flag;
+  document.getElementById('langDisplay').textContent = cfg.name;
+  
+  document.querySelectorAll('.lang-opt').forEach(opt => opt.classList.remove('active'));
+  document.querySelector(`.lang-opt[onclick="setLang('${lang}')"]`).classList.add('active');
+  
+  document.querySelectorAll('[data-lang-content]').forEach(el => el.classList.remove('active'));
+  document.querySelector(`[data-lang-content="${lang}"]`).classList.add('active');
+  
+  document.documentElement.lang = lang;
+}
+</script>
+</body>
+</html>
