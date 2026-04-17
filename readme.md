@@ -3,9 +3,9 @@
 Générez et distribuez des tickets Wi-Fi sécurisés, chiffrés et à expiration automatique. 100% côté client, sans serveur.
 
 ## 📶 Accès Rapide
-Scannez ce QR code pour ouvrir l'application directement sur votre téléphone ou tablette :
+Scannez ce QR code pour ouvrir l'application sur votre mobile :
 
-![QR Code ABtime](https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=https://sellerfit.github.io/wifi-ticket/&bgcolor=ffffff&color=0f172a&margin=10)
+![QR Code ABtime](https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://sellerfit.github.io/wifi-ticket/&bgcolor=ffffff&color=0f172a&margin=10)
 
 🔗 **Lien direct :** `https://sellerfit.github.io/wifi-ticket/`
 
